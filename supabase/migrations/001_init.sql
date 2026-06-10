@@ -49,13 +49,16 @@ alter table Moragas.access_keys enable row level security;
 alter table Moragas.sessions enable row level security;
 alter table Moragas.transactions enable row level security;
 
--- RLS policies
+-- RLS policies (drop first for idempotent re-runs)
+drop policy if exists "Service role only - access_keys" on Moragas.access_keys;
 create policy "Service role only - access_keys" on Moragas.access_keys
   for all using (true) with check (true);
 
+drop policy if exists "Service role only - sessions" on Moragas.sessions;
 create policy "Service role only - sessions" on Moragas.sessions
   for all using (true) with check (true);
 
+drop policy if exists "Service role only - transactions" on Moragas.transactions;
 create policy "Service role only - transactions" on Moragas.transactions
   for all using (true) with check (true);
 
@@ -85,5 +88,11 @@ as $$
   from Moragas.transactions
   where type = 'egreso'
   group by category
-  order by total desc;
+    order by total desc;
 $$;
+
+-- Grant permissions for API access
+grant usage on schema Moragas to service_role, anon, authenticated;
+grant all privileges on all tables in schema Moragas to service_role;
+grant all privileges on all routines in schema Moragas to service_role;
+grant usage, select on all sequences in schema Moragas to service_role;
