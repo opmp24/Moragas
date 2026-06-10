@@ -7,7 +7,7 @@ const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY!;
 export const ADMIN_MASTER_KEY = process.env.ADMIN_MASTER_KEY || 'MoragasAdmin2024';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
-  db: { schema: 'Moragas' },
+  db: { schema: 'moragas' },
 });
 
 export function respond(status: number, data: Record<string, unknown>): HandlerResponse {
