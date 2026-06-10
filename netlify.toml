@@ -25,7 +25,7 @@
 
 [dev]
   framework = "vite"
-  targetPort = 8888
+  targetPort = 5173
   functionsPort = 8889
   publish = "dist"
-  autoLaunch = false
+  autoLaunch = true

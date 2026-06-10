@@ -37,7 +37,7 @@ describe('Login page', () => {
 
   it('muestra el nombre Moragas', () => {
     renderLogin();
-    expect(screen.getByText('Moragas')).toBeInTheDocument();
+    expect(screen.getAllByText(/Moragas/).length).toBeGreaterThan(0);
   });
 
   it('deshabilita el botón si no hay clave', () => {

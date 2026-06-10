@@ -6,3 +6,17 @@ dist/
 .DS_Store
 .vite/
 Docs/
+
+# Local Netlify folder
+.netlify
+
+# Compiled JS outputs
+src/**/*.js
+shared/*.js
+
+# Build artifacts
+tsconfig.tsbuildinfo
+
+# Other
+deno.lock
+nul
