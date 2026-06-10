@@ -56,7 +56,7 @@ describe('getTransactions', () => {
     const txs = [{ id: '1', type: 'egreso', amount: 5000, category: 'comida' }];
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => txs,
+      json: async () => ({ data: txs }),
     });
 
     const result = await api.getTransactions('t');

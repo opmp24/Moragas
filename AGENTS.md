@@ -172,6 +172,7 @@ Moragas/
 - Branch naming: `feat/`, `fix/`, `chore/`
 - Conventional commits
 - No commitear secrets ni `.env`
+- no hacer commit o merge a la rama `main` sin solicitud explicita
 
 ---
 

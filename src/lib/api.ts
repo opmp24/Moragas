@@ -13,6 +13,12 @@ async function req<T>(url: string, body?: unknown): Promise<T> {
   return data;
 }
 
+// For endpoints that wrap the result in { data: ... }
+async function reqData<T>(url: string, body?: unknown): Promise<T> {
+  const res = await req<{ data: T }>(url, body);
+  return res.data;
+}
+
 export function login(key: string): Promise<UserSession> {
   return req(`${BASE}/login`, { key });
 }
@@ -34,17 +40,17 @@ export function adminRevokeKey(token: string, keyId: string): Promise<void> {
 }
 
 export function adminListKeys(token: string): Promise<AccessKey[]> {
-  return req(`${BASE}/admin-list-keys?token=${encodeURIComponent(token)}`);
+  return reqData(`${BASE}/admin-list-keys?token=${encodeURIComponent(token)}`);
 }
 
 export function getTransactions(token: string): Promise<Transaction[]> {
-  return req(`${BASE}/transactions?token=${encodeURIComponent(token)}`);
+  return reqData(`${BASE}/transactions?token=${encodeURIComponent(token)}`);
 }
 
 export function getMonthlySummary(token: string): Promise<MonthlySummary[]> {
-  return req(`${BASE}/transactions/summary/monthly?token=${encodeURIComponent(token)}`);
+  return reqData(`${BASE}/transactions?token=${encodeURIComponent(token)}&summary=monthly`);
 }
 
 export function getCategorySummary(token: string): Promise<CategorySummary[]> {
-  return req(`${BASE}/transactions/summary/category?token=${encodeURIComponent(token)}`);
+  return reqData(`${BASE}/transactions?token=${encodeURIComponent(token)}&summary=category`);
 }
