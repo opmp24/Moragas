@@ -18,9 +18,28 @@ npm run dev              # Vite dev server (http://localhost:5173)
 npm run build            # TypeScript check + Vite build → dist/
 npm run preview          # preview production build
 npm run typecheck        # tsc --noEmit (solo frontend)
+npm test                 # vitest run (tests unitarios)
+npm run test:watch       # vitest watch mode
+npm run test:cov         # vitest con cobertura
+npm run test:e2e         # playwright test (E2E)
+npm run test:e2e:ui      # playwright UI mode
 ```
 
-Testing no está configurado aún.
+## Testing
+
+### Unit tests (Vitest)
+- Framework: **Vitest** + **@testing-library/react** + **jsdom**
+- Test files: `src/**/*.test.ts` o `src/**/__tests__/*.test.tsx`
+- Single test: `npx vitest run src/lib/__tests__/api.test.ts`
+- By pattern: `npx vitest run --grep="login"`
+- Config: `vitest.config.ts` (jsdom, alias @/, globals: true)
+
+### E2E tests (Playwright)
+- Framework: **@playwright/test** con Chromium
+- Test files: `e2e/*.spec.ts`
+- Single test: `npx playwright test e2e/login.spec.ts`
+- UI mode: `npx playwright test --ui`
+- Config: `playwright.config.ts` (arranca Vite automáticamente)
 
 ---
 
@@ -34,6 +53,9 @@ Moragas/
 │   ├── components/Charts/        # MonthlyChart, CategoryChart (Recharts)
 │   ├── lib/                      # supabase.ts, api.ts (Netlify Functions client)
 │   └── types/                    # TypeScript interfaces
+│   ├── __tests__/                 # Test unitarios (api)
+│   └── pages/__tests__/           # Test unitarios (componentes)
+├── e2e/                           # Test E2E con Playwright
 ├── netlify/functions/            # Netlify Functions (backend)
 │   ├── login.ts                  # Validar clave, crear sesión
 │   ├── logout.ts                 # Eliminar sesión
