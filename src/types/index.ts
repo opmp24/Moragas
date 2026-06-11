@@ -6,4 +6,6 @@ export type {
   UserSession,
   MonthlySummary,
   CategorySummary,
+  Category,
+  UserSummary,
 } from '../../shared/types';

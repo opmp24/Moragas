@@ -1,13 +1,28 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getTransactions, getMonthlySummary, getCategorySummary } from '../lib/api';
-import type { Transaction, MonthlySummary, CategorySummary } from '../types';
+import { getTransactions, getMonthlySummary, getCategorySummary, getCategories } from '../lib/api';
+import type { Transaction, MonthlySummary, CategorySummary, Category, UserSummary } from '../types';
+import { getIcon } from '../lib/categoryIcons';
 import MonthlyChart from '../components/Charts/MonthlyChart';
 import CategoryChart from '../components/Charts/CategoryChart';
-import { Wallet, TrendingUp, TrendingDown, Receipt, RefreshCw } from 'lucide-react';
+import UserChart from '../components/Charts/UserChart';
+import UserMonthlyChart from '../components/Charts/UserMonthlyChart';
+import { Wallet, TrendingUp, TrendingDown, Receipt, RefreshCw, Users } from 'lucide-react';
 
 function formatCLP(n: number) {
   return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n);
+}
+
+function buildUserSummary(transactions: Transaction[]): UserSummary[] {
+  const byUser: Record<string, { total: number; count: number }> = {};
+  for (const t of transactions) {
+    if (t.type !== 'egreso') continue;
+    const u = t.user_name || 'Sin nombre';
+    if (!byUser[u]) byUser[u] = { total: 0, count: 0 };
+    byUser[u].total += t.amount;
+    byUser[u].count += 1;
+  }
+  return Object.entries(byUser).map(([user_name, v]) => ({ user_name, ...v }));
 }
 
 export default function Dashboard() {
@@ -15,20 +30,23 @@ export default function Dashboard() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [monthly, setMonthly] = useState<MonthlySummary[]>([]);
   const [categories, setCategories] = useState<CategorySummary[]>([]);
+  const [categoryDefs, setCategoryDefs] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     if (!user) return;
     setLoading(true);
     try {
-      const [txs, mon, cat] = await Promise.all([
+      const [txs, mon, cat, catDefs] = await Promise.all([
         getTransactions(user.token),
         getMonthlySummary(user.token),
         getCategorySummary(user.token),
+        getCategories(user.token),
       ]);
       setTransactions(txs);
       setMonthly(mon);
       setCategories(cat);
+      setCategoryDefs(catDefs);
     } catch (err) {
       console.error(err);
     } finally {
@@ -43,6 +61,18 @@ export default function Dashboard() {
   const totalIngresos = transactions.filter((t) => t.type === 'ingreso').reduce((s, t) => s + t.amount, 0);
   const totalEgresos = transactions.filter((t) => t.type === 'egreso').reduce((s, t) => s + t.amount, 0);
   const balance = totalIngresos - totalEgresos;
+
+  // Build category color map
+  const catColorMap: Record<string, string> = {};
+  for (const c of categoryDefs) {
+    catColorMap[c.name] = c.color;
+  }
+
+  // Build user summary for charts
+  const userSummary = buildUserSummary(transactions);
+
+  // Build category lookup by name
+  const catLookup = new Map(categoryDefs.map(c => [c.name, c]));
 
   if (loading) {
     return (
@@ -104,9 +134,22 @@ export default function Dashboard() {
         </div>
         <div className="card">
           <h2 className="mb-4 text-sm font-medium text-surface-500">Gastos por Categoría</h2>
-          {categories.length > 0 ? <CategoryChart data={categories} /> : <EmptyChart />}
+          {categories.length > 0 ? <CategoryChart data={categories} colors={catColorMap} /> : <EmptyChart />}
         </div>
       </div>
+
+      {userSummary.length > 0 && (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="card">
+            <h2 className="mb-4 text-sm font-medium text-surface-500">Gastos por Usuario (Total)</h2>
+            <UserChart data={userSummary} />
+          </div>
+          <div className="card">
+            <h2 className="mb-4 text-sm font-medium text-surface-500">Gastos por Usuario por Mes</h2>
+            <UserMonthlyChart data={transactions} />
+          </div>
+        </div>
+      )}
 
       <div className="card">
         <h2 className="mb-4 text-sm font-medium text-surface-500">Historial</h2>
@@ -129,29 +172,39 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {transactions.map((tx) => (
-                  <tr key={tx.id} className="border-b last:border-0 border-surface-100 dark:border-surface-800">
-                    <td className="py-2.5 text-surface-500">
-                      {new Date(tx.created_at).toLocaleDateString('es-CL')}
-                    </td>
-                    <td className="py-2.5">
-                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-                        tx.type === 'ingreso'
-                          ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400'
-                          : 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400'
+                {transactions.map((tx) => {
+                  const cat = catLookup.get(tx.category);
+                  const Icon = cat ? getIcon(cat.icon) : null;
+                  return (
+                    <tr key={tx.id} className="border-b last:border-0 border-surface-100 dark:border-surface-800">
+                      <td className="py-2.5 text-surface-500">
+                        {new Date(tx.created_at).toLocaleDateString('es-CL')}
+                      </td>
+                      <td className="py-2.5">
+                        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                          tx.type === 'ingreso'
+                            ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400'
+                            : 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400'
+                        }`}>
+                          {tx.type === 'ingreso' ? 'Ingreso' : 'Gasto'}
+                        </span>
+                      </td>
+                      <td className="py-2.5">
+                        <span className="inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium capitalize"
+                          style={{ backgroundColor: (cat?.color || '#6b7280') + '20', color: cat?.color || '#6b7280' }}>
+                          {Icon && <Icon size={12} />}
+                          {tx.category}
+                        </span>
+                      </td>
+                      <td className="py-2.5 text-surface-600 dark:text-surface-400">{tx.description}</td>
+                      <td className={`py-2.5 text-right font-mono font-medium ${
+                        tx.type === 'ingreso' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                       }`}>
-                        {tx.type === 'ingreso' ? 'Ingreso' : 'Gasto'}
-                      </span>
-                    </td>
-                    <td className="py-2.5 capitalize text-surface-700 dark:text-surface-300">{tx.category}</td>
-                    <td className="py-2.5 text-surface-600 dark:text-surface-400">{tx.description}</td>
-                    <td className={`py-2.5 text-right font-mono font-medium ${
-                      tx.type === 'ingreso' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                    }`}>
-                      {formatCLP(tx.amount)}
-                    </td>
-                  </tr>
-                ))}
+                        {formatCLP(tx.amount)}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

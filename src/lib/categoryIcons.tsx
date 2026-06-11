@@ -1,0 +1,66 @@
+import type { LucideIcon } from 'lucide-react';
+import {
+  Circle, TrendingUp, Home, UtensilsCrossed, Car, MoreHorizontal,
+  ShoppingCart, Coffee, Bus, Train, Plane, Fuel,
+  DollarSign, CreditCard, Wallet, PiggyBank, Gift, Heart,
+  Briefcase, Book, Music, Gamepad2, Shirt, ShoppingBag,
+  Pill, Phone, Zap, Tv, Monitor, Camera, Headphones,
+  TreePine, Store, Landmark, Building2, Hotel, Tent,
+  Bike, Dog, Cat, Flower2, CloudSun, Umbrella,
+  HelpCircle, AlertCircle, Info,
+} from 'lucide-react';
+
+const iconMap: Record<string, LucideIcon> = {
+  circle: Circle,
+  'trending-up': TrendingUp,
+  home: Home,
+  'utensils-crossed': UtensilsCrossed,
+  car: Car,
+  'more-horizontal': MoreHorizontal,
+  'shopping-cart': ShoppingCart,
+  coffee: Coffee,
+  bus: Bus,
+  train: Train,
+  plane: Plane,
+  fuel: Fuel,
+  'dollar-sign': DollarSign,
+  'credit-card': CreditCard,
+  wallet: Wallet,
+  'piggy-bank': PiggyBank,
+  gift: Gift,
+  heart: Heart,
+  briefcase: Briefcase,
+  book: Book,
+  music: Music,
+  gamepad2: Gamepad2,
+  shirt: Shirt,
+  'shopping-bag': ShoppingBag,
+  pill: Pill,
+  phone: Phone,
+  zap: Zap,
+  tv: Tv,
+  monitor: Monitor,
+  camera: Camera,
+  headphones: Headphones,
+  'tree-pine': TreePine,
+  store: Store,
+  landmark: Landmark,
+  building2: Building2,
+  hotel: Hotel,
+  tent: Tent,
+  bike: Bike,
+  dog: Dog,
+  cat: Cat,
+  'flower-2': Flower2,
+  'cloud-sun': CloudSun,
+  umbrella: Umbrella,
+  'help-circle': HelpCircle,
+  'alert-circle': AlertCircle,
+  info: Info,
+};
+
+export function getIcon(name: string): LucideIcon {
+  return iconMap[name] || Circle;
+}
+
+export const AVAILABLE_ICONS = Object.keys(iconMap).sort();

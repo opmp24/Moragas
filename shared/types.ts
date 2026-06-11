@@ -50,8 +50,23 @@ export interface MonthlySummary {
   egresos: number;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  type: 'ingreso' | 'egreso';
+  color: string;
+  icon: string;
+  created_at: string;
+}
+
 export interface CategorySummary {
   category: string;
+  total: number;
+  count: number;
+}
+
+export interface UserSummary {
+  user_name: string;
   total: number;
   count: number;
 }

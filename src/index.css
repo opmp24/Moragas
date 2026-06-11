@@ -9,6 +9,23 @@
   body {
     @apply min-h-screen;
   }
+  body.custom-cursor {
+    cursor: none;
+  }
+  body.custom-cursor a,
+  body.custom-cursor button,
+  body.custom-cursor input,
+  body.custom-cursor textarea,
+  body.custom-cursor select,
+  body.custom-cursor [role="button"] {
+    cursor: none;
+  }
+}
+
+@layer utilities {
+  .cursor-glow {
+    @apply pointer-events-none fixed left-0 top-0 z-[9999] rounded-full;
+  }
 }
 
 @layer components {

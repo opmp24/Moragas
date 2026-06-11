@@ -1,4 +1,4 @@
-import type { UserSession, AccessKey, Transaction, MonthlySummary, CategorySummary } from '../types';
+import type { UserSession, AccessKey, Transaction, MonthlySummary, CategorySummary, Category } from '../types';
 
 const BASE = '/.netlify/functions';
 
@@ -53,4 +53,37 @@ export function getMonthlySummary(token: string): Promise<MonthlySummary[]> {
 
 export function getCategorySummary(token: string): Promise<CategorySummary[]> {
   return reqData(`${BASE}/transactions?token=${encodeURIComponent(token)}&summary=category`);
+}
+
+export function adminCreateTransaction(
+  token: string,
+  data: { type: 'ingreso' | 'egreso'; amount: number; category: string; description?: string; user_name?: string }
+): Promise<Transaction> {
+  return reqData(`${BASE}/admin-create-transaction`, { token, ...data });
+}
+
+export function getCategories(token: string): Promise<Category[]> {
+  return reqData(`${BASE}/admin-categories?token=${encodeURIComponent(token)}`);
+}
+
+export function adminCreateCategory(
+  token: string,
+  data: { name: string; type: 'ingreso' | 'egreso'; color: string; icon: string }
+): Promise<Category> {
+  return reqData(`${BASE}/admin-create-category`, { token, ...data });
+}
+
+export function adminDeleteCategory(
+  token: string,
+  categoryId: string
+): Promise<void> {
+  return req(`${BASE}/admin-delete-category`, { token, categoryId });
+}
+
+export function adminUpdateCategory(
+  token: string,
+  categoryId: string,
+  data: { name: string; type: 'ingreso' | 'egreso'; color: string; icon: string }
+): Promise<Category> {
+  return reqData(`${BASE}/admin-update-category`, { token, categoryId, ...data });
 }

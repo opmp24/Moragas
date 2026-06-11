@@ -20,3 +20,10 @@ tsconfig.tsbuildinfo
 # Other
 deno.lock
 nul
+
+# Local assets
+recursos/
+
+# Test artifacts
+test-results/
+e2e/screenshots/

@@ -3,6 +3,7 @@
 ## Project Overview
 
 **Moragas** — App de finanzas personales. Admin envía mensajes a un bot de Telegram → Gemini clasifica (ingreso/egreso, categoría, monto) → guarda en Supabase. Usuarios acceden vía clave única y ven dashboard con gráficos.
+el agente debe responder siempre en español.
 
 - Telegram bot: `@OkoViajero_bot`
 - Supabase project: `yfdwtfricvquakrtarey`
@@ -33,6 +34,7 @@ npm run test:e2e:ui      # playwright UI mode
 - Single test: `npx vitest run src/lib/__tests__/api.test.ts`
 - By pattern: `npx vitest run --grep="login"`
 - Config: `vitest.config.ts` (jsdom, alias @/, globals: true)
+- Siempre haz comprobaciones y test utilizando playwright
 
 ### E2E tests (Playwright)
 - Framework: **@playwright/test** con Chromium

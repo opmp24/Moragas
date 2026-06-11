@@ -1,7 +1,7 @@
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import type { CategorySummary } from '../../types';
 
-const COLORS = ['#10b981', '#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+const FALLBACK_COLORS = ['#10b981', '#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
 
 function formatCLP(n: number) {
   return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n);
@@ -12,19 +12,24 @@ const CustomTooltip = ({ active, payload }: any) => {
   const d = payload[0].payload;
   return (
     <div className="rounded-lg border bg-white p-3 shadow-lg dark:bg-surface-800 dark:border-surface-700">
-      <p className="mb-1 text-sm font-medium capitalize">{d.category}</p>
+      <p className="mb-1 text-sm font-medium capitalize" style={{ color: d.fill || '#6b7280' }}>{d.category}</p>
       <p className="text-sm text-surface-600 dark:text-surface-400">{formatCLP(d.total)}</p>
       <p className="text-xs text-surface-400">{d.count} transacciones</p>
     </div>
   );
 };
 
-export default function CategoryChart({ data }: { data: CategorySummary[] }) {
+export default function CategoryChart({ data, colors }: { data: CategorySummary[]; colors?: Record<string, string> }) {
+  const chartData = data.map(d => ({
+    ...d,
+    fill: colors?.[d.category] || FALLBACK_COLORS[data.indexOf(d) % FALLBACK_COLORS.length],
+  }));
+
   return (
     <ResponsiveContainer width="100%" height={280}>
       <PieChart>
         <Pie
-          data={data}
+          data={chartData}
           dataKey="total"
           nameKey="category"
           cx="50%"
@@ -33,8 +38,8 @@ export default function CategoryChart({ data }: { data: CategorySummary[] }) {
           outerRadius={100}
           paddingAngle={2}
         >
-          {data.map((_, i) => (
-            <Cell key={i} fill={COLORS[i % COLORS.length]} />
+          {chartData.map((d, i) => (
+            <Cell key={i} fill={d.fill} />
           ))}
         </Pie>
         <Tooltip content={<CustomTooltip />} />
