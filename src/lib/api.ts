@@ -1,91 +1,115 @@
 import type { UserSession, AccessKey, Transaction, MonthlySummary, CategorySummary, Category } from '../types';
+import { supabase } from './supabase';
 
-const API_HOST = 'https://moragas.netlify.app';
-const API_PATH = '/.netlify/functions';
-const BASE = `${API_HOST}${API_PATH}`;
-
-async function req<T>(url: string, body?: unknown): Promise<T> {
-  const res = await fetch(url, {
-    method: body ? 'POST' : 'GET',
-    headers: body ? { 'Content-Type': 'application/json' } : undefined,
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Error de conexión');
-  return data;
+async function rpc<T>(name: string, args?: Record<string, unknown>): Promise<T> {
+  const { data, error } = await supabase.rpc(name, args || {});
+  if (error) throw new Error(error.message);
+  return data as T;
 }
 
-// For endpoints that wrap the result in { data: ... }
-async function reqData<T>(url: string, body?: unknown): Promise<T> {
-  const res = await req<{ data: T }>(url, body);
-  return res.data;
+function jsonArray<T>(data: unknown): T[] {
+  if (!data) return [];
+  if (Array.isArray(data)) return data as T[];
+  return JSON.parse(data as string) as T[];
 }
 
-export function login(key: string): Promise<UserSession> {
-  return req(`${BASE}/login`, { key });
+function jsonObject<T>(data: unknown): T {
+  if (data && typeof data === 'object') return data as T;
+  return JSON.parse(data as string) as T;
 }
 
-export function logout(token: string): Promise<void> {
-  return req(`${BASE}/logout`, { token });
+export async function login(key: string): Promise<UserSession> {
+  return rpc<UserSession>('login_with_key', { p_key: key });
 }
 
-export function me(token: string): Promise<UserSession> {
-  return req(`${BASE}/me?token=${encodeURIComponent(token)}`);
+export async function logout(token: string): Promise<void> {
+  await rpc('logout', { p_token: token });
 }
 
-export function adminCreateKey(token: string, displayName: string): Promise<{ key: string; id: string }> {
-  return req(`${BASE}/admin-create-key`, { token, displayName });
+export async function me(token: string): Promise<UserSession> {
+  const data = await rpc('get_me', { p_token: token });
+  return jsonObject<UserSession>(data);
 }
 
-export function adminRevokeKey(token: string, keyId: string): Promise<void> {
-  return req(`${BASE}/admin-revoke-key`, { token, keyId });
+export async function adminCreateKey(token: string, displayName: string): Promise<{ key: string; id: string }> {
+  const data = await rpc('admin_create_key', { p_token: token, p_display_name: displayName });
+  return jsonObject<{ key: string; id: string }>(data);
 }
 
-export function adminListKeys(token: string): Promise<AccessKey[]> {
-  return reqData(`${BASE}/admin-list-keys?token=${encodeURIComponent(token)}`);
+export async function adminRevokeKey(token: string, keyId: string): Promise<void> {
+  await rpc('admin_revoke_key', { p_token: token, p_key_id: keyId });
 }
 
-export function getTransactions(token: string): Promise<Transaction[]> {
-  return reqData(`${BASE}/transactions?token=${encodeURIComponent(token)}`);
+export async function adminListKeys(token: string): Promise<AccessKey[]> {
+  const data = await rpc('admin_list_keys', { p_token: token });
+  return jsonArray<AccessKey>(data);
 }
 
-export function getMonthlySummary(token: string): Promise<MonthlySummary[]> {
-  return reqData(`${BASE}/transactions?token=${encodeURIComponent(token)}&summary=monthly`);
+export async function getTransactions(token: string): Promise<Transaction[]> {
+  const data = await rpc('get_transactions', { p_token: token });
+  return jsonArray<Transaction>(data);
 }
 
-export function getCategorySummary(token: string): Promise<CategorySummary[]> {
-  return reqData(`${BASE}/transactions?token=${encodeURIComponent(token)}&summary=category`);
+export async function getMonthlySummary(token: string): Promise<MonthlySummary[]> {
+  const data = await rpc('get_monthly_summary_rpc', { p_token: token });
+  return jsonArray<MonthlySummary>(data);
 }
 
-export function adminCreateTransaction(
+export async function getCategorySummary(token: string): Promise<CategorySummary[]> {
+  const data = await rpc('get_category_summary_rpc', { p_token: token });
+  return jsonArray<CategorySummary>(data);
+}
+
+export async function adminCreateTransaction(
   token: string,
   data: { type: 'ingreso' | 'egreso'; amount: number; category: string; description?: string; user_name?: string }
 ): Promise<Transaction> {
-  return reqData(`${BASE}/admin-create-transaction`, { token, ...data });
+  const result = await rpc('create_transaction', {
+    p_token: token,
+    p_type: data.type,
+    p_amount: data.amount,
+    p_category: data.category,
+    p_description: data.description || '',
+    p_user_name: data.user_name || null,
+  });
+  return jsonObject<Transaction>(result);
 }
 
-export function getCategories(token: string): Promise<Category[]> {
-  return reqData(`${BASE}/admin-categories?token=${encodeURIComponent(token)}`);
+export async function getCategories(token: string): Promise<Category[]> {
+  const data = await rpc('admin_get_categories', { p_token: token });
+  return jsonArray<Category>(data);
 }
 
-export function adminCreateCategory(
+export async function adminCreateCategory(
   token: string,
   data: { name: string; type: 'ingreso' | 'egreso'; color: string; icon: string }
 ): Promise<Category> {
-  return reqData(`${BASE}/admin-create-category`, { token, ...data });
+  const result = await rpc('admin_create_category', {
+    p_token: token,
+    p_name: data.name,
+    p_type: data.type,
+    p_color: data.color,
+    p_icon: data.icon,
+  });
+  return jsonObject<Category>(result);
 }
 
-export function adminDeleteCategory(
-  token: string,
-  categoryId: string
-): Promise<void> {
-  return req(`${BASE}/admin-delete-category`, { token, categoryId });
+export async function adminDeleteCategory(token: string, categoryId: string): Promise<void> {
+  await rpc('admin_delete_category', { p_token: token, p_category_id: categoryId });
 }
 
-export function adminUpdateCategory(
+export async function adminUpdateCategory(
   token: string,
   categoryId: string,
   data: { name: string; type: 'ingreso' | 'egreso'; color: string; icon: string }
 ): Promise<Category> {
-  return reqData(`${BASE}/admin-update-category`, { token, categoryId, ...data });
+  const result = await rpc('admin_update_category', {
+    p_token: token,
+    p_category_id: categoryId,
+    p_name: data.name,
+    p_type: data.type,
+    p_color: data.color,
+    p_icon: data.icon,
+  });
+  return jsonObject<Category>(result);
 }
