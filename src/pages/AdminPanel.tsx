@@ -413,7 +413,7 @@ export default function AdminPanel() {
                     </span>
                     <div>
                       <p className="text-sm font-medium text-surface-900 dark:text-surface-100">{c.name}</p>
-                      <p className="text-xs capitalize text-surface-400">{c.type} · {c.icon}</p>
+                      <p className="text-xs capitalize text-surface-400">{c.type}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
