@@ -1,6 +1,8 @@
 import type { UserSession, AccessKey, Transaction, MonthlySummary, CategorySummary, Category } from '../types';
 
-const BASE = 'https://moragas.netlify.app/.netlify/functions';
+const API_HOST = 'https://moragas.netlify.app';
+const API_PATH = '/.netlify/functions';
+const BASE = `${API_HOST}${API_PATH}`;
 
 async function req<T>(url: string, body?: unknown): Promise<T> {
   const res = await fetch(url, {
