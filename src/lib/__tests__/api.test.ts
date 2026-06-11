@@ -17,7 +17,7 @@ describe('login', () => {
 
     const result = await api.login('mi-clave');
     expect(mockFetch).toHaveBeenCalledWith(
-      '/.netlify/functions/login',
+      'https://moragas.netlify.app/.netlify/functions/login',
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ key: 'mi-clave' }),
@@ -45,7 +45,7 @@ describe('me', () => {
 
     await api.me('token123');
     expect(mockFetch).toHaveBeenCalledWith(
-      '/.netlify/functions/me?token=token123',
+      'https://moragas.netlify.app/.netlify/functions/me?token=token123',
       expect.objectContaining({ method: 'GET' }),
     );
   });
