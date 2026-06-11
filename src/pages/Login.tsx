@@ -50,10 +50,12 @@ function RevealItem({ children, delay = 0, className = '' }: { children: React.R
   );
 }
 
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
 function Img({ src, className }: { src: string; className?: string }) {
   return (
     <img
-      src={src}
+      src={base + src}
       alt=""
       className={`${className} shadow-lg`}
       loading="lazy"
@@ -93,7 +95,7 @@ export default function Login() {
         <motion.div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: 'url(/img/fondo.avif)',
+            backgroundImage: `url(${base}/img/fondo.avif)`,
             y: bgY,
           }}
         />
