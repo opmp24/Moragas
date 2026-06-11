@@ -1,6 +1,6 @@
 import type { UserSession, AccessKey, Transaction, MonthlySummary, CategorySummary, Category } from '../types';
 
-const BASE = '/.netlify/functions';
+const BASE = 'https://moragas.netlify.app/.netlify/functions';
 
 async function req<T>(url: string, body?: unknown): Promise<T> {
   const res = await fetch(url, {
