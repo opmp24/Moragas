@@ -1,7 +1,10 @@
 import type { Handler } from '@netlify/functions';
-import { verifySession, getToken, ok, err } from './_shared';
+import { verifySession, getToken, ok, err, corsPreflight} from './_shared';
 
 export const handler: Handler = async (event) => {
+  const cors = corsPreflight(event);
+  if (cors) return cors;
+
   const token = getToken(event);
   if (!token) return err(401, 'Token requerido');
 

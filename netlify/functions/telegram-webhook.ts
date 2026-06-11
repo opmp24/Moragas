@@ -1,6 +1,6 @@
 import type { Handler } from '@netlify/functions';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { supabase, ok, err } from './_shared';
+import { supabase, ok, err, corsPreflight} from './_shared';
 
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
 const ADMIN_ID = process.env.ADMIN_TELEGRAM_ID!;
@@ -50,6 +50,9 @@ async function classifyWithGemini(text: string) {
 }
 
 export const handler: Handler = async (event) => {
+  const cors = corsPreflight(event);
+  if (cors) return cors;
+
   try {
     const body = JSON.parse(event.body || '{}');
     const message = body.message;

@@ -1,8 +1,11 @@
 import type { Handler } from '@netlify/functions';
-import { supabase, ok, err, hashKey, ADMIN_MASTER_KEY, randomKey } from './_shared';
+import { supabase, ok, err, hashKey, ADMIN_MASTER_KEY, randomKey, corsPreflight} from './_shared';
 import crypto from 'crypto';
 
 export const handler: Handler = async (event) => {
+  const cors = corsPreflight(event);
+  if (cors) return cors;
+
   if (event.httpMethod !== 'POST') return err(405, 'Método no permitido');
 
   const { key } = JSON.parse(event.body || '{}');
