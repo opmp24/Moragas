@@ -185,12 +185,12 @@ export default function Login() {
                   </div>
                 </div>
 
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    className="flex items-center gap-2 rounded-xl bg-red-500/10 p-3 text-sm text-red-400"
-                  >
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex items-center gap-2 rounded-xl bg-red-500/10 p-3 text-sm text-red-400"
+                    >
                     <AlertCircle size={16} className="shrink-0" />
                     {error}
                   </motion.div>
