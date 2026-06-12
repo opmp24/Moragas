@@ -40,6 +40,11 @@ export async function adminRevokeKey(token: string, keyId: string): Promise<void
   await rpc('admin_revoke_key', { p_token: token, p_key_id: keyId });
 }
 
+export async function adminResetKey(token: string, keyId: string): Promise<{ key: string; id: string }> {
+  const data = await rpc('admin_reset_key', { p_token: token, p_key_id: keyId });
+  return jsonObject<{ key: string; id: string }>(data);
+}
+
 export async function adminListKeys(token: string): Promise<AccessKey[]> {
   const data = await rpc('admin_list_keys', { p_token: token });
   return jsonArray<AccessKey>(data);

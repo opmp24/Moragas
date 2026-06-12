@@ -1,9 +1,9 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { adminListKeys, adminCreateKey, adminRevokeKey, adminCreateTransaction, getCategories, adminCreateCategory, adminDeleteCategory, adminUpdateCategory } from '../lib/api';
+import { adminListKeys, adminCreateKey, adminRevokeKey, adminResetKey, adminCreateTransaction, getCategories, adminCreateCategory, adminDeleteCategory, adminUpdateCategory } from '../lib/api';
 import type { AccessKey, Category } from '../types';
 import { getIcon, AVAILABLE_ICONS } from '../lib/categoryIcons';
-import { Key, Plus, X, Copy, Check, RefreshCw, UserCheck, UserX, DollarSign, Trash2, AlertCircle, Pencil, Eye } from 'lucide-react';
+import { Key, Plus, X, Copy, Check, RefreshCw, UserCheck, UserX, DollarSign, Trash2, AlertCircle, Pencil } from 'lucide-react';
 
 export default function AdminPanel() {
   const { user } = useAuth();
@@ -18,7 +18,7 @@ export default function AdminPanel() {
   const [plainKeys, setPlainKeys] = useState<Record<string, string>>(() => {
     try { return JSON.parse(localStorage.getItem('moragas-plain-keys') || '{}'); } catch { return {}; }
   });
-  const [revealedKey, setRevealedKey] = useState<string | null>(null);
+  const [resettingKey, setResettingKey] = useState<string | null>(null);
 
   // Transaction state
   const [txType, setTxType] = useState<'ingreso' | 'egreso'>('egreso');
@@ -106,6 +106,20 @@ export default function AdminPanel() {
       await fetchKeys();
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleResetKey = async (keyId: string) => {
+    if (!user) return;
+    setResettingKey(keyId);
+    try {
+      const result = await adminResetKey(user.token, keyId);
+      setPlainKeys(prev => ({ ...prev, [result.id]: result.key }));
+      await fetchKeys();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setResettingKey(null);
     }
   };
 
@@ -473,8 +487,8 @@ export default function AdminPanel() {
                     <p className="text-sm font-medium text-surface-900 dark:text-surface-100">{k.display_name}</p>
                     <p className="text-xs text-surface-400">
                       {k.role === 'admin' ? 'Admin' : 'Usuario'} · {k.is_active ? 'Activo' : 'Inactivo'} · Creado {new Date(k.created_at).toLocaleDateString('es-CL')}
-                      {plainKeys[k.id] && revealedKey === k.id && (
-                        <span className="ml-2 font-mono text-primary-500">{plainKeys[k.id]}</span>
+                      {plainKeys[k.id] && (
+                        <span className="ml-2 font-mono font-bold text-primary-600 dark:text-primary-400">{plainKeys[k.id]}</span>
                       )}
                     </p>
                   </div>
@@ -482,13 +496,14 @@ export default function AdminPanel() {
                 <div className="flex items-center gap-2">
                   {k.is_active ? (
                     <>
-                      {plainKeys[k.id] && (
+                      {k.role !== 'admin' && (
                         <button
-                          onClick={() => setRevealedKey(revealedKey === k.id ? null : k.id)}
-                          className="btn-ghost p-2 text-surface-400 hover:text-primary-600"
-                          title={revealedKey === k.id ? 'Ocultar clave' : 'Ver clave'}
+                          onClick={() => handleResetKey(k.id)}
+                          disabled={resettingKey === k.id}
+                          className="btn-ghost p-2 text-surface-400 hover:text-amber-600"
+                          title="Resetear clave"
                         >
-                          <Eye size={16} />
+                          <RefreshCw size={16} className={resettingKey === k.id ? 'animate-spin' : ''} />
                         </button>
                       )}
                       <button
