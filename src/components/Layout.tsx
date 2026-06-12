@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import {
@@ -16,7 +16,6 @@ import { useState } from 'react';
 export default function Layout() {
   const { user, logout } = useAuth();
   const { theme, toggle } = useTheme();
-  const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -48,23 +47,23 @@ export default function Layout() {
               <span className="hidden sm:inline">Moragas</span>
             </Link>
             <nav className="ml-6 hidden items-center gap-1 lg:flex">
-              {navItems.map((item) => {
-                const active = location.pathname === item.to;
-                return (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                      active
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.to === '/'}
+                  className={({ isActive }) =>
+                    `flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                      isActive
                         ? 'bg-primary-50 text-primary-700 dark:bg-primary-950 dark:text-primary-400'
                         : 'text-surface-600 hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-800'
-                    }`}
-                  >
-                    <item.icon size={16} />
-                    {item.label}
-                  </Link>
-                );
-              })}
+                    }`
+                  }
+                >
+                  <item.icon size={16} />
+                  {item.label}
+                </NavLink>
+              ))}
             </nav>
           </div>
           <div className="flex items-center gap-2">
@@ -79,24 +78,24 @@ export default function Layout() {
         </div>
         {mobileOpen && (
           <nav className="border-t px-4 py-2 lg:hidden">
-            {navItems.map((item) => {
-              const active = location.pathname === item.to;
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  onClick={() => setMobileOpen(false)}
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${
-                    active
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.to === '/'}
+                onClick={() => setMobileOpen(false)}
+                className={({ isActive }) =>
+                  `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${
+                    isActive
                       ? 'bg-primary-50 text-primary-700 dark:bg-primary-950 dark:text-primary-400'
                       : 'text-surface-600 dark:text-surface-400'
-                  }`}
-                >
-                  <item.icon size={16} />
-                  {item.label}
-                </Link>
-              );
-            })}
+                  }`
+                }
+              >
+                <item.icon size={16} />
+                {item.label}
+              </NavLink>
+            ))}
           </nav>
         )}
       </header>
