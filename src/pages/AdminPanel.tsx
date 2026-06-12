@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { adminListKeys, adminCreateKey, adminRevokeKey, adminCreateTransaction, getCategories, adminCreateCategory, adminDeleteCategory, adminUpdateCategory } from '../lib/api';
 import type { AccessKey, Category } from '../types';
 import { getIcon, AVAILABLE_ICONS } from '../lib/categoryIcons';
-import { Key, Plus, X, Copy, Check, RefreshCw, UserCheck, UserX, DollarSign, Trash2, AlertCircle, Pencil } from 'lucide-react';
+import { Key, Plus, X, Copy, Check, RefreshCw, UserCheck, UserX, DollarSign, Trash2, AlertCircle, Pencil, Eye } from 'lucide-react';
 
 export default function AdminPanel() {
   const { user } = useAuth();
@@ -15,6 +15,8 @@ export default function AdminPanel() {
   const [newKey, setNewKey] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [plainKeys, setPlainKeys] = useState<Record<string, string>>({});
+  const [revealedKey, setRevealedKey] = useState<string | null>(null);
 
   // Transaction state
   const [txType, setTxType] = useState<'ingreso' | 'egreso'>('egreso');
@@ -81,6 +83,7 @@ export default function AdminPanel() {
     try {
       const result = await adminCreateKey(user.token, newName.trim());
       setNewKey(result.key);
+      setPlainKeys(prev => ({ ...prev, [result.id]: result.key }));
       setNewName('');
       await fetchKeys();
     } catch (err) {
@@ -464,18 +467,32 @@ export default function AdminPanel() {
                     <p className="text-sm font-medium text-surface-900 dark:text-surface-100">{k.display_name}</p>
                     <p className="text-xs text-surface-400">
                       {k.role === 'admin' ? 'Admin' : 'Usuario'} · {k.is_active ? 'Activo' : 'Inactivo'} · Creado {new Date(k.created_at).toLocaleDateString('es-CL')}
+                      {plainKeys[k.id] && revealedKey === k.id && (
+                        <span className="ml-2 font-mono text-primary-500">{plainKeys[k.id]}</span>
+                      )}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   {k.is_active ? (
-                    <button
-                      onClick={() => handleRevoke(k.id)}
-                      className="btn-ghost p-2 text-red-500 hover:text-red-700"
-                      title="Revocar acceso"
-                    >
-                      <UserX size={16} />
-                    </button>
+                    <>
+                      {plainKeys[k.id] && (
+                        <button
+                          onClick={() => setRevealedKey(revealedKey === k.id ? null : k.id)}
+                          className="btn-ghost p-2 text-surface-400 hover:text-primary-600"
+                          title={revealedKey === k.id ? 'Ocultar clave' : 'Ver clave'}
+                        >
+                          <Eye size={16} />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleRevoke(k.id)}
+                        className="btn-ghost p-2 text-red-500 hover:text-red-700"
+                        title="Revocar acceso"
+                      >
+                        <UserX size={16} />
+                      </button>
+                    </>
                   ) : (
                     <span className="flex items-center gap-1 text-xs text-surface-400">
                       <UserCheck size={14} /> Revocado

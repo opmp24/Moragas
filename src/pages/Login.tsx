@@ -1,7 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { Wallet, Key, AlertCircle, Eye, EyeOff, Moon, Sun, ChevronDown } from 'lucide-react';
+import { Wallet, Key, AlertCircle, Eye, EyeOff, Moon, Sun, ChevronDown, Download } from 'lucide-react';
 import { motion, useScroll, useTransform, useVelocity, useSpring } from 'framer-motion';
 
 function ParallaxItem({ children, speed, className = '' }: { children: React.ReactNode; speed: number; className?: string }) {
@@ -63,6 +63,11 @@ function Img({ src, className }: { src: string; className?: string }) {
   );
 }
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
 export default function Login() {
   const { login } = useAuth();
   const { theme, toggle } = useTheme();
@@ -70,9 +75,28 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showKey, setShowKey] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const { scrollYProgress } = useScroll();
   const bgY = useTransform(scrollYProgress, [0, 1], [0, -250]);
   const formOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e as BeforeInstallPromptEvent);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setInstallPrompt(null);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -213,6 +237,18 @@ export default function Login() {
                     'Ingresar'
                   )}
                 </motion.button>
+
+                {installPrompt && (
+                  <motion.button
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    onClick={handleInstall}
+                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-6 py-2.5 text-sm font-medium text-white/70 transition-all hover:bg-white/10 hover:text-white"
+                  >
+                    <Download size={16} />
+                    Instalar app
+                  </motion.button>
+                )}
               </form>
             </div>
           </motion.div>
