@@ -27,7 +27,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-export default function MonthlyChart({ data }: { data: MonthlySummary[] }) {
+export default function MonthlyChart({ data, type }: { data: MonthlySummary[]; type?: 'ingreso' | 'egreso' }) {
   return (
     <ResponsiveContainer width="100%" height={280}>
       <BarChart data={data} barGap={4}>
@@ -35,8 +35,8 @@ export default function MonthlyChart({ data }: { data: MonthlySummary[] }) {
         <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
         <Tooltip content={<CustomTooltip />} />
         <Legend iconType="circle" fontSize={12} />
-        <Bar dataKey="ingresos" name="Ingresos" fill="#10b981" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="egresos" name="Gastos" fill="#ef4444" radius={[4, 4, 0, 0]} />
+        {(!type || type === 'ingreso') && <Bar dataKey="ingresos" name="Ingresos" fill="#10b981" radius={[4, 4, 0, 0]} />}
+        {(!type || type === 'egreso') && <Bar dataKey="egresos" name="Gastos" fill="#ef4444" radius={[4, 4, 0, 0]} />}
       </BarChart>
     </ResponsiveContainer>
   );
