@@ -22,6 +22,7 @@ export default function AdminPanel() {
   const [txCategory, setTxCategory] = useState('');
   const [txDescription, setTxDescription] = useState('');
   const [txUserName, setTxUserName] = useState('');
+  const [txDate, setTxDate] = useState(new Date().toISOString().slice(0, 10));
   const [txSubmitting, setTxSubmitting] = useState(false);
   const [txError, setTxError] = useState<string | null>(null);
   const [txSuccess, setTxSuccess] = useState<string | null>(null);
@@ -116,12 +117,14 @@ export default function AdminPanel() {
         category: cat?.name || txCategory,
         description: txDescription.trim() || undefined,
         user_name: txUserName.trim() || undefined,
+        date: txDate || undefined,
       });
       setTxSuccess(`Transacción creada: $${amount.toLocaleString('es-CL')} · ${txType} · ${cat?.name || txCategory}`);
       setTxAmount('');
       setTxCategory('');
       setTxDescription('');
       setTxUserName('');
+      setTxDate(new Date().toISOString().slice(0, 10));
     } catch (err) {
       setTxError(err instanceof Error ? err.message : 'Error al crear transacción');
     } finally {
@@ -271,9 +274,9 @@ export default function AdminPanel() {
       <div className="card">
         <h2 className="mb-4 text-sm font-medium text-surface-500">Crear transacción manual</h2>
         <form onSubmit={handleCreateTransaction} className="space-y-3">
-          <div className="flex gap-3">
-            <button type="button" onClick={() => { setTxType('egreso'); setTxCategory(''); }} className={`btn-sm flex-1 ${txType === 'egreso' ? 'bg-red-500 text-white' : 'bg-surface-100 text-surface-600 dark:bg-surface-800 dark:text-surface-400'}`}>Gasto</button>
-            <button type="button" onClick={() => { setTxType('ingreso'); setTxCategory(''); }} className={`btn-sm flex-1 ${txType === 'ingreso' ? 'bg-green-500 text-white' : 'bg-surface-100 text-surface-600 dark:bg-surface-800 dark:text-surface-400'}`}>Ingreso</button>
+          <div className="flex w-full overflow-hidden rounded-lg border border-surface-300 dark:border-surface-600">
+            <button type="button" onClick={() => { setTxType('egreso'); setTxCategory(''); }} className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${txType === 'egreso' ? 'bg-red-500 text-white' : 'bg-surface-100 text-surface-600 dark:bg-surface-800 dark:text-surface-400'}`}>Gasto</button>
+            <button type="button" onClick={() => { setTxType('ingreso'); setTxCategory(''); }} className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${txType === 'ingreso' ? 'bg-green-500 text-white' : 'bg-surface-100 text-surface-600 dark:bg-surface-800 dark:text-surface-400'}`}>Ingreso</button>
           </div>
           <div className="flex gap-3">
             <input type="number" step="1" min="1" value={txAmount} onChange={(e) => setTxAmount(e.target.value)} className="input flex-1" placeholder="Monto (CLP)" disabled={txSubmitting} />
@@ -299,8 +302,9 @@ export default function AdminPanel() {
               })()}
             </div>
           </div>
-          <input type="text" value={txDescription} onChange={(e) => setTxDescription(e.target.value)} className="input w-full" placeholder="Descripción (opcional)" disabled={txSubmitting} />
           <input type="text" value={txUserName} onChange={(e) => setTxUserName(e.target.value)} className="input w-full" placeholder="Nombre usuario (opcional)" disabled={txSubmitting} />
+          <input type="text" value={txDescription} onChange={(e) => setTxDescription(e.target.value)} className="input w-full" placeholder="Descripción (opcional)" disabled={txSubmitting} />
+          <input type="date" value={txDate} onChange={(e) => setTxDate(e.target.value)} className="input w-full" disabled={txSubmitting} />
           {txError && <p className="text-sm text-red-500">{txError}</p>}
           {txSuccess && <p className="text-sm text-green-600">{txSuccess}</p>}
           <button type="submit" disabled={txSubmitting} className="btn-primary w-full">

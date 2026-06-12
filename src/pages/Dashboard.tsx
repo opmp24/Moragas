@@ -13,10 +13,10 @@ function formatCLP(n: number) {
   return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n);
 }
 
-function buildUserSummary(transactions: Transaction[]): UserSummary[] {
+function buildUserSummary(transactions: Transaction[], type?: 'ingreso' | 'egreso'): UserSummary[] {
   const byUser: Record<string, { total: number; count: number }> = {};
   for (const t of transactions) {
-    if (t.type !== 'egreso') continue;
+    if (type && t.type !== type) continue;
     const u = t.user_name || 'Sin nombre';
     if (!byUser[u]) byUser[u] = { total: 0, count: 0 };
     byUser[u].total += t.amount;
@@ -68,8 +68,9 @@ export default function Dashboard() {
     catColorMap[c.name] = c.color;
   }
 
-  // Build user summary for charts
-  const userSummary = buildUserSummary(transactions);
+  // Build user summaries for charts
+  const egresoSummary = buildUserSummary(transactions, 'egreso');
+  const ingresoSummary = buildUserSummary(transactions, 'ingreso');
 
   // Build category lookup by name
   const catLookup = new Map(categoryDefs.map(c => [c.name, c]));
@@ -138,18 +139,32 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {userSummary.length > 0 && (
-        <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
+        {egresoSummary.length > 0 && (
           <div className="card">
             <h2 className="mb-4 text-sm font-medium text-surface-500">Gastos por Usuario (Total)</h2>
-            <UserChart data={userSummary} />
+            <UserChart data={egresoSummary} color="#ef4444" />
           </div>
+        )}
+        {ingresoSummary.length > 0 && (
+          <div className="card">
+            <h2 className="mb-4 text-sm font-medium text-surface-500">Ingresos por Usuario (Total)</h2>
+            <UserChart data={ingresoSummary} color="#10b981" />
+          </div>
+        )}
+        {egresoSummary.length > 0 && (
           <div className="card">
             <h2 className="mb-4 text-sm font-medium text-surface-500">Gastos por Usuario por Mes</h2>
-            <UserMonthlyChart data={transactions} />
+            <UserMonthlyChart data={transactions} type="egreso" />
           </div>
-        </div>
-      )}
+        )}
+        {ingresoSummary.length > 0 && (
+          <div className="card">
+            <h2 className="mb-4 text-sm font-medium text-surface-500">Ingresos por Usuario por Mes</h2>
+            <UserMonthlyChart data={transactions} type="ingreso" />
+          </div>
+        )}
+      </div>
 
       <div className="card">
         <h2 className="mb-4 text-sm font-medium text-surface-500">Historial</h2>
@@ -167,6 +182,7 @@ export default function Dashboard() {
                   <th className="pb-2 font-medium">Fecha</th>
                   <th className="pb-2 font-medium">Tipo</th>
                   <th className="pb-2 font-medium">Categoría</th>
+                  <th className="pb-2 font-medium">Usuario</th>
                   <th className="pb-2 font-medium">Descripción</th>
                   <th className="pb-2 font-medium text-right">Monto</th>
                 </tr>
@@ -196,6 +212,7 @@ export default function Dashboard() {
                           {tx.category}
                         </span>
                       </td>
+                      <td className="py-2.5 text-surface-500">{tx.user_name || '-'}</td>
                       <td className="py-2.5 text-surface-600 dark:text-surface-400">{tx.description}</td>
                       <td className={`py-2.5 text-right font-mono font-medium ${
                         tx.type === 'ingreso' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'

@@ -62,7 +62,7 @@ export async function getCategorySummary(token: string): Promise<CategorySummary
 
 export async function adminCreateTransaction(
   token: string,
-  data: { type: 'ingreso' | 'egreso'; amount: number; category: string; description?: string; user_name?: string }
+  data: { type: 'ingreso' | 'egreso'; amount: number; category: string; description?: string; user_name?: string; date?: string }
 ): Promise<Transaction> {
   const result = await rpc('create_transaction', {
     p_token: token,
@@ -71,6 +71,7 @@ export async function adminCreateTransaction(
     p_category: data.category,
     p_description: data.description || '',
     p_user_name: data.user_name || null,
+    p_date: data.date || null,
   });
   return jsonObject<Transaction>(result);
 }

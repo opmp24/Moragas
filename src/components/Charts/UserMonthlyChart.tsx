@@ -26,14 +26,14 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 const USER_COLORS = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
 
-export default function UserMonthlyChart({ data }: { data: Transaction[] }) {
-  const egresos = data.filter(t => t.type === 'egreso');
+export default function UserMonthlyChart({ data, type }: { data: Transaction[]; type?: 'ingreso' | 'egreso' }) {
+  const filtered = type ? data.filter(t => t.type === type) : data;
 
   // Group by month + user_name
   const byMonth: Record<string, Record<string, number>> = {};
   const allUsers = new Set<string>();
 
-  for (const t of egresos) {
+  for (const t of filtered) {
     const month = t.created_at.slice(0, 7);
     const user = t.user_name || 'Sin nombre';
     allUsers.add(user);

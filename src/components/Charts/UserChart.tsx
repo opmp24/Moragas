@@ -17,7 +17,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-export default function UserChart({ data }: { data: UserSummary[] }) {
+export default function UserChart({ data, color }: { data: UserSummary[]; color?: string }) {
   if (data.length === 0) return null;
 
   const sorted = [...data].sort((a, b) => b.total - a.total);
@@ -29,7 +29,7 @@ export default function UserChart({ data }: { data: UserSummary[] }) {
         <XAxis type="number" tick={{ fontSize: 12 }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
         <YAxis type="category" dataKey="user_name" tick={{ fontSize: 12 }} tickFormatter={(v) => v || 'Sin nombre'} width={70} />
         <Tooltip content={<CustomTooltip />} />
-        <Bar dataKey="total" fill="#ef4444" radius={[0, 4, 4, 0]} />
+        <Bar dataKey="total" fill={color || '#ef4444'} radius={[0, 4, 4, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );
