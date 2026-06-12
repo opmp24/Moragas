@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from '../../context/AuthContext';
-import Dashboard from '../Dashboard';
+import Movements from '../Movements';
 
 const mockLogin = vi.fn();
 vi.mock('../../context/AuthContext', async () => {
@@ -28,14 +28,6 @@ vi.mock('../../lib/api', () => {
   ];
   return {
     getTransactions: vi.fn().mockResolvedValue(tx),
-    getMonthlySummary: vi.fn().mockResolvedValue([
-      { month: '2026-05', ingresos: 20000, egresos: 0 },
-      { month: '2026-06', ingresos: 50000, egresos: 8000 },
-    ]),
-    getCategorySummary: vi.fn().mockResolvedValue([
-      { category: 'comida', total: 5000, count: 1 },
-      { category: 'transporte', total: 3000, count: 1 },
-    ]),
     getCategories: vi.fn().mockResolvedValue([
       { id: 'c1', name: 'comida', type: 'egreso', color: '#ef4444', icon: 'coffee', created_at: '' },
       { id: 'c2', name: 'transporte', type: 'egreso', color: '#f59e0b', icon: 'car', created_at: '' },
@@ -45,48 +37,53 @@ vi.mock('../../lib/api', () => {
   };
 });
 
-async function renderDashboard() {
+async function renderMovements() {
   const result = render(
     <BrowserRouter>
       <AuthProvider>
-        <Dashboard />
+        <Movements />
       </AuthProvider>
     </BrowserRouter>,
   );
-  await waitFor(() => expect(screen.getByRole('heading', { name: 'Dashboard' })).toBeInTheDocument());
+  await waitFor(() => expect(screen.getByRole('heading', { name: 'Movimientos' })).toBeInTheDocument());
   return result;
 }
 
-describe('Dashboard layout', () => {
-  it('renderiza las tarjetas de resumen', async () => {
-    await renderDashboard();
-    expect(screen.getByText('Ingresos')).toBeInTheDocument();
-    expect(screen.getByText('Gastos')).toBeInTheDocument();
-    expect(screen.getByText('Balance')).toBeInTheDocument();
+function getTableRowCount() {
+  return screen.getAllByRole('row').length;
+}
+
+describe('Movements filters', () => {
+  it('filtra por categoria', async () => {
+    await renderMovements();
+    expect(getTableRowCount()).toBe(5);
+    const selects = screen.getAllByRole('combobox');
+    fireEvent.change(selects[0], { target: { value: 'comida' } });
+    await waitFor(() => expect(getTableRowCount()).toBe(2));
   });
 
-  it('renderiza los tabs Gasto e Ingreso', async () => {
-    await renderDashboard();
-    expect(screen.getByRole('button', { name: 'Gasto' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Ingreso' })).toBeInTheDocument();
+  it('filtra por usuario', async () => {
+    await renderMovements();
+    expect(getTableRowCount()).toBe(5);
+    const input = screen.getByPlaceholderText('Filtrar usuario…');
+    await userEvent.type(input, 'María');
+    await waitFor(() => expect(getTableRowCount()).toBe(2));
+  });
+
+  it('filtra por rango de fechas', async () => {
+    const { container } = await renderMovements();
+    expect(getTableRowCount()).toBe(5);
+
+    const dateInputs = container.querySelectorAll<HTMLInputElement>('input[type="date"]');
+    fireEvent.change(dateInputs[0], { target: { value: '2026-06-01' } });
+    await waitFor(() => expect(getTableRowCount()).toBe(4));
   });
 });
 
-describe('Dashboard tabs', () => {
-  it('muestra graficos de ingreso por defecto', async () => {
-    await renderDashboard();
-    expect(screen.getByText('Ingresos por Mes')).toBeInTheDocument();
-    expect(screen.getByText('Ingresos por Usuario (Total)')).toBeInTheDocument();
-    expect(screen.getByText('Ingresos por Usuario por Mes')).toBeInTheDocument();
-  });
-
-  it('cambia a pestaña gasto y muestra sus graficos', async () => {
-    await renderDashboard();
-    await userEvent.click(screen.getByRole('button', { name: 'Gasto' }));
-    expect(screen.getByText('Gastos por Mes')).toBeInTheDocument();
-    expect(screen.getByText('Gastos por Categoría')).toBeInTheDocument();
-    expect(screen.getByText('Gastos por Categoría (Total)')).toBeInTheDocument();
-    expect(screen.getByText('Gastos por Usuario por Mes')).toBeInTheDocument();
-    expect(screen.queryByText('Ingresos por Mes')).not.toBeInTheDocument();
+describe('Movements sort', () => {
+  it('ordena al hacer click en header', async () => {
+    await renderMovements();
+    await userEvent.click(screen.getByText('Monto'));
+    expect(getTableRowCount()).toBe(5);
   });
 });

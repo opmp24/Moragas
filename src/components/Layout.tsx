@@ -10,6 +10,7 @@ import {
   Menu,
   X,
   Wallet,
+  ArrowLeftRight,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -23,6 +24,7 @@ export default function Layout() {
 
   const navItems = [
     { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { to: '/movements', label: 'Movimientos', icon: ArrowLeftRight },
     ...(isAdmin ? [{ to: '/admin', label: 'Admin', icon: Shield }] : []),
   ];
 

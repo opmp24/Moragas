@@ -15,7 +15,9 @@ export default function AdminPanel() {
   const [newKey, setNewKey] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [plainKeys, setPlainKeys] = useState<Record<string, string>>({});
+  const [plainKeys, setPlainKeys] = useState<Record<string, string>>(() => {
+    try { return JSON.parse(localStorage.getItem('moragas-plain-keys') || '{}'); } catch { return {}; }
+  });
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
 
   // Transaction state
@@ -70,6 +72,10 @@ export default function AdminPanel() {
       setCatLoading(false);
     }
   };
+
+  useEffect(() => {
+    localStorage.setItem('moragas-plain-keys', JSON.stringify(plainKeys));
+  }, [plainKeys]);
 
   useEffect(() => {
     fetchKeys();
