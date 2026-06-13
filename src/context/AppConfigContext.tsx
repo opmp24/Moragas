@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import { getAppConfig, adminUpdateAppConfig } from '../lib/api';
+import { ICON_SVG_PATHS } from '../lib/iconSvgPaths';
 import type { AppConfig } from '../types';
 
 interface AppConfigContextValue {
@@ -47,8 +48,9 @@ function applyColor(color: string) {
   }
 }
 
-function updatePwaManifest(name: string, color: string) {
-  const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192"><rect width="192" height="192" rx="32" fill="${color}"/><text x="96" y="124" font-size="80" fill="white" text-anchor="middle" font-family="sans-serif" font-weight="bold">${name.charAt(0).toUpperCase()}</text></svg>`;
+function updatePwaManifest(name: string, color: string, iconName: string = 'wallet') {
+  const iconPaths = ICON_SVG_PATHS[iconName] || ICON_SVG_PATHS.wallet;
+  const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 24 24"><rect x="0" y="0" width="24" height="24" rx="4" fill="${color}"/><g stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">${iconPaths}</g></svg>`;
   const iconBlob = new Blob([svgIcon], { type: 'image/svg+xml' });
   const iconUrl = URL.createObjectURL(iconBlob);
 
@@ -88,7 +90,7 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
       .then(cfg => {
         setConfig(cfg);
         applyColor(cfg.primary_color);
-        updatePwaManifest(cfg.app_name, cfg.primary_color);
+        updatePwaManifest(cfg.app_name, cfg.primary_color, cfg.app_icon);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -98,7 +100,7 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
     const updated = await adminUpdateAppConfig(token, data);
     setConfig(updated);
     applyColor(updated.primary_color);
-    updatePwaManifest(updated.app_name, updated.primary_color);
+    updatePwaManifest(updated.app_name, updated.primary_color, updated.app_icon);
   }, []);
 
   return (

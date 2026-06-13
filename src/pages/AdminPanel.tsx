@@ -360,6 +360,7 @@ export default function AdminPanel() {
               {brandMsg === 'Guardado' ? <><Check size={14} className="inline" /> Cambios aplicados al instante</> : brandMsg}
             </p>
           )}
+          <p className="text-xs text-surface-400">Los usuarios deben reinstalar la app (PWA) para ver el nuevo icono.</p>
         </form>
       </div>
 
