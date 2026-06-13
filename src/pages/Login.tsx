@@ -148,19 +148,19 @@ export default function Login() {
             <Img src="/img/1.png" className="w-32 h-32 opacity-70" />
           </ParallaxItem>
           <ParallaxItem speed={-0.25} className="right-[12%] top-[15%]">
-            <Img src="/img/Dttfy87ZMDoIdnbn9YIiK6narUQ.avif" className="w-48 h-32 opacity-60" />
+            <Img src="/img/2.png" className="w-48 h-32 opacity-60" />
           </ParallaxItem>
           <ParallaxItem speed={0.2} className="left-[5%] top-[45%]">
-            <Img src="/img/mUY8RHfaogduuUwahiZ9hX276nU.avif" className="w-28 h-28 opacity-60" />
+            <Img src="/img/3.png" className="w-28 h-28 opacity-60" />
           </ParallaxItem>
           <ParallaxItem speed={-0.35} className="right-[8%] top-[40%]">
-            <Img src="/img/3.png" className="w-40 h-40 opacity-50" />
+            <Img src="/img/4.png" className="w-40 h-40 opacity-50" />
           </ParallaxItem>
           <ParallaxItem speed={0.3} className="left-[15%] top-[65%]">
-            <Img src="/img/5.webp" className="w-48 h-28 opacity-50" />
+            <Img src="/img/5.png" className="w-48 h-28 opacity-50" />
           </ParallaxItem>
           <ParallaxItem speed={-0.2} className="right-[15%] top-[60%]">
-            <Img src="/img/NNBnMi0QPnU6xB0hnAga2ZosyRY.avif" className="w-28 h-40 opacity-50" />
+            <Img src="/img/6.png" className="w-28 h-40 opacity-50" />
           </ParallaxItem>
         </div>
 
@@ -270,16 +270,16 @@ export default function Login() {
       <section className="relative z-10 flex min-h-screen items-center justify-center overflow-hidden px-6">
         <div className="absolute inset-0">
           <RevealItem delay={0.1} className="left-[10%] top-[15%]">
-            <Img src="/img/PJ0w31MgQo5ygygee622cJcCkRE.avif" className="w-40 h-40 opacity-60" />
+            <Img src="/img/7.png" className="w-40 h-40 opacity-60" />
           </RevealItem>
           <RevealItem delay={0.3} className="right-[15%] top-[25%]">
-            <Img src="/img/uyqQY5IhacSqsI76stSxZMmxs.avif" className="w-32 h-32 opacity-50" />
+            <Img src="/img/8.png" className="w-32 h-32 opacity-50" />
           </RevealItem>
           <RevealItem delay={0.2} className="left-[20%] top-[55%]">
-            <Img src="/img/wu8fR3oWcPdqbhuxVwPkVCqzAZU.avif" className="w-56 h-32 opacity-50" />
+            <Img src="/img/9.png" className="w-56 h-32 opacity-50" />
           </RevealItem>
           <RevealItem delay={0.4} className="right-[10%] top-[65%]">
-            <Img src="/img/X2MHZtpTpzqMAdzDZd2NEJ9Ob8.avif" className="w-32 h-48 opacity-40" />
+            <Img src="/img/1.png" className="w-32 h-48 opacity-40" />
           </RevealItem>
         </div>
 
@@ -325,16 +325,16 @@ export default function Login() {
       <section className="relative z-10 flex min-h-screen items-end justify-center overflow-hidden px-6 pb-8">
         <div className="absolute inset-0">
           <RevealItem delay={0.2} className="left-[5%] top-[10%]">
-            <Img src="/img/ZDmYldvtnsEYPsEwdlbH1I86n4.avif" className="w-28 h-28 opacity-40" />
+            <Img src="/img/2.png" className="w-28 h-28 opacity-40" />
           </RevealItem>
           <RevealItem delay={0.4} className="right-[8%] top-[20%]">
-            <Img src="/img/Dttfy87ZMDoIdnbn9YIiK6narUQ.avif" className="w-48 h-24 opacity-40" />
+            <Img src="/img/3.png" className="w-48 h-24 opacity-40" />
           </RevealItem>
           <RevealItem delay={0.3} className="left-[50%] top-[60%]">
-            <Img src="/img/mUY8RHfaogduuUwahiZ9hX276nU.avif" className="w-24 h-24 opacity-30" />
+            <Img src="/img/4.png" className="w-24 h-24 opacity-30" />
           </RevealItem>
           <RevealItem delay={0.35} className="left-[30%] top-[35%]">
-            <Img src="/img/2.jpg" className="w-36 h-28 opacity-40" />
+            <Img src="/img/5.png" className="w-36 h-28 opacity-40" />
           </RevealItem>
         </div>
 
