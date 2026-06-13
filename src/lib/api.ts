@@ -1,4 +1,4 @@
-import type { UserSession, AccessKey, Transaction, MonthlySummary, CategorySummary, Category } from '../types';
+import type { UserSession, AccessKey, Transaction, MonthlySummary, CategorySummary, Category, AppConfig } from '../types';
 import { supabase } from './supabase';
 
 async function rpc<T>(name: string, args?: Record<string, unknown>): Promise<T> {
@@ -29,6 +29,16 @@ export async function logout(token: string): Promise<void> {
 export async function me(token: string): Promise<UserSession> {
   const data = await rpc('get_me', { p_token: token });
   return jsonObject<UserSession>(data);
+}
+
+export async function getAppConfig(): Promise<AppConfig> {
+  const data = await rpc('get_app_config');
+  return jsonObject<AppConfig>(data);
+}
+
+export async function adminUpdateAppConfig(token: string, data: { app_name?: string; primary_color?: string }): Promise<AppConfig> {
+  const result = await rpc('admin_update_app_config', { p_token: token, p_app_name: data.app_name || null, p_primary_color: data.primary_color || null });
+  return jsonObject<AppConfig>(result);
 }
 
 export async function adminCreateKey(token: string, displayName: string): Promise<{ key: string; id: string }> {

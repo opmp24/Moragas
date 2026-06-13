@@ -1,6 +1,7 @@
 import { Outlet, Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useAppConfig } from '../context/AppConfigContext';
 import {
   LayoutDashboard,
   Shield,
@@ -17,6 +18,7 @@ import { useState } from 'react';
 export default function Layout() {
   const { user, logout } = useAuth();
   const { theme, toggle } = useTheme();
+  const { config } = useAppConfig();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -46,7 +48,7 @@ export default function Layout() {
             </button>
             <Link to="/" className="flex items-center gap-2 font-semibold text-primary-700 dark:text-primary-400">
               <Wallet size={22} />
-              <span className="hidden sm:inline">Moragas</span>
+              <span className="hidden sm:inline">{config?.app_name || 'Moragas'}</span>
             </Link>
             <nav className="ml-6 hidden items-center gap-1 lg:flex">
               {navItems.map((item) => (

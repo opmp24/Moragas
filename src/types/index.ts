@@ -7,5 +7,6 @@ export type {
   MonthlySummary,
   CategorySummary,
   Category,
+  AppConfig,
   UserSummary,
 } from '../../shared/types';

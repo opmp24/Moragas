@@ -26,6 +26,7 @@ export default defineConfig({
           { src: 'icons/icon-512.svg', sizes: '512x512', type: 'image/svg+xml' },
         ],
       },
+      // Note: name, theme_color and icons are overridden at runtime via AppConfigContext
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,svg,png}'],
       },

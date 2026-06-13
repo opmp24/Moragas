@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useAppConfig } from '../context/AppConfigContext';
 import { Wallet, Key, AlertCircle, Eye, EyeOff, Moon, Sun, ChevronDown, Download } from 'lucide-react';
 import { motion, useScroll, useTransform, useVelocity, useSpring } from 'framer-motion';
 
@@ -71,6 +72,7 @@ interface BeforeInstallPromptEvent extends Event {
 export default function Login() {
   const { login } = useAuth();
   const { theme, toggle } = useTheme();
+  const { config: appConfig } = useAppConfig();
   const [key, setKey] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -172,7 +174,7 @@ export default function Login() {
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-md">
               <Wallet className="text-white" size={24} />
             </div>
-            <span className="text-2xl font-bold text-white">Moragas</span>
+            <span className="text-2xl font-bold text-white">{appConfig?.app_name || 'Moragas'}</span>
           </motion.div>
 
           <motion.div style={{ opacity: formOpacity }} className="w-full max-w-sm">
@@ -281,15 +283,42 @@ export default function Login() {
           </RevealItem>
         </div>
 
-        <motion.p
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="text-center text-lg text-white/40"
-        >
-          Tus finanzas personales con Telegram
-        </motion.p>
+        <div className="max-w-lg text-center">
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="text-2xl font-bold text-white"
+          >
+            Controla tus finanzas desde Telegram
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.15 }}
+            className="mt-3 text-base text-white/60"
+          >
+            Envía un mensaje al bot y Moragas clasifica automáticamente cada gasto o ingreso con IA.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="mt-6 space-y-3 text-left"
+          >
+            <div className="flex items-start gap-3">
+              <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-500/20 text-xs text-green-400">✓</span>
+              <p className="text-sm text-white/50"><strong className="text-white/70">Ejemplo:</strong> "Almuerzo 5.000" → Gasto · Comida · $5.000. "Sueldo 500.000" → Ingreso · Sueldo · $500.000</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-500/20 text-xs text-green-400">✓</span>
+              <p className="text-sm text-white/50"><strong className="text-white/70">Ventajas:</strong> Sin apps bancarias, multi-usuario con claves individuales, dashboard con gráficos por mes/categoría/usuario, PWA instalable en el celular</p>
+            </div>
+          </motion.div>
+        </div>
       </section>
 
       {/* Third section — more items + footer */}
@@ -304,10 +333,13 @@ export default function Login() {
           <RevealItem delay={0.3} className="left-[50%] top-[60%]">
             <Img src="/img/mUY8RHfaogduuUwahiZ9hX276nU.avif" className="w-24 h-24 opacity-30" />
           </RevealItem>
+          <RevealItem delay={0.35} className="left-[30%] top-[35%]">
+            <Img src="/img/2.jpg" className="w-36 h-28 opacity-40" />
+          </RevealItem>
         </div>
 
         <div className="w-full max-w-6xl text-center text-sm text-white/15">
-          Moragas — Hecho con cuidado
+          Hecho con cuidado
         </div>
       </section>
     </div>

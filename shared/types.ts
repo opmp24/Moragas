@@ -65,6 +65,14 @@ export interface CategorySummary {
   count: number;
 }
 
+export interface AppConfig {
+  id: string;
+  app_name: string;
+  primary_color: string;
+  updated_at: string;
+  updated_by: string | null;
+}
+
 export interface UserSummary {
   user_name: string;
   total: number;

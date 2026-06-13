@@ -136,7 +136,7 @@ export default function Dashboard() {
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="card">
             <h2 className="mb-4 text-sm font-medium text-surface-500">Gastos por Mes</h2>
-            {monthly.length > 0 ? <MonthlyChart data={monthly} type="egreso" /> : <EmptyChart />}
+            {monthly.length > 0 ? <MonthlyChart data={monthly} type="egreso" showYearTabs /> : <EmptyChart />}
           </div>
           <div className="card">
             <h2 className="mb-4 text-sm font-medium text-surface-500">Gastos por Categoría</h2>
@@ -161,7 +161,7 @@ export default function Dashboard() {
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="card">
             <h2 className="mb-4 text-sm font-medium text-surface-500">Ingresos por Mes</h2>
-            {monthly.length > 0 ? <MonthlyChart data={monthly} type="ingreso" /> : <EmptyChart />}
+            {monthly.length > 0 ? <MonthlyChart data={monthly} type="ingreso" showYearTabs /> : <EmptyChart />}
           </div>
           {ingresoSummary.length > 0 && (
             <div className="card">

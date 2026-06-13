@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { AppConfigProvider } from './context/AppConfigContext';
 import './index.css';
 
 const basename = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -13,7 +14,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <BrowserRouter basename={basename}>
       <ThemeProvider>
         <AuthProvider>
-          <App />
+          <AppConfigProvider>
+            <App />
+          </AppConfigProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>

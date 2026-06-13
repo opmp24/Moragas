@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { adminListKeys, adminCreateKey, adminRevokeKey, adminResetKey, adminCreateTransaction, getCategories, adminCreateCategory, adminDeleteCategory, adminUpdateCategory } from '../lib/api';
+import { useAppConfig } from '../context/AppConfigContext';
+import { adminListKeys, adminCreateKey, adminRevokeKey, adminResetKey, adminUpdateAppConfig, adminCreateTransaction, getCategories, adminCreateCategory, adminDeleteCategory, adminUpdateCategory } from '../lib/api';
 import type { AccessKey, Category } from '../types';
 import { getIcon, AVAILABLE_ICONS } from '../lib/categoryIcons';
-import { Key, Plus, X, Copy, Check, RefreshCw, UserCheck, UserX, DollarSign, Trash2, AlertCircle, Pencil } from 'lucide-react';
+import { Key, Plus, X, Copy, Check, RefreshCw, UserCheck, UserX, DollarSign, Trash2, AlertCircle, Pencil, Palette } from 'lucide-react';
 
 export default function AdminPanel() {
   const { user } = useAuth();
@@ -19,6 +20,36 @@ export default function AdminPanel() {
     try { return JSON.parse(localStorage.getItem('moragas-plain-keys') || '{}'); } catch { return {}; }
   });
   const [resettingKey, setResettingKey] = useState<string | null>(null);
+
+  // Branding state
+  const { config: appConfig, updateConfig } = useAppConfig();
+  const [brandName, setBrandName] = useState('');
+  const [brandColor, setBrandColor] = useState('');
+  const [brandSaving, setBrandSaving] = useState(false);
+  const [brandMsg, setBrandMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (appConfig) {
+      setBrandName(appConfig.app_name);
+      setBrandColor(appConfig.primary_color);
+    }
+  }, [appConfig]);
+
+  const handleSaveBrand = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !brandName.trim()) return;
+    setBrandSaving(true);
+    setBrandMsg(null);
+    try {
+      await updateConfig(user.token, { app_name: brandName.trim(), primary_color: brandColor });
+      setBrandMsg('Guardado');
+      setTimeout(() => setBrandMsg(null), 2000);
+    } catch (err) {
+      setBrandMsg(err instanceof Error ? err.message : 'Error');
+    } finally {
+      setBrandSaving(false);
+    }
+  };
 
   // Transaction state
   const [txType, setTxType] = useState<'ingreso' | 'egreso'>('egreso');
@@ -259,6 +290,40 @@ export default function AdminPanel() {
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-semibold">Panel de Administración</h1>
+
+      {/* Personalizar */}
+      <div className="card">
+        <h2 className="mb-4 text-sm font-medium text-surface-500">Personalizar</h2>
+        <form onSubmit={handleSaveBrand} className="space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl" style={{ backgroundColor: brandColor + '30' }}>
+              <span className="text-lg font-bold" style={{ color: brandColor }}>{brandName.charAt(0).toUpperCase() || 'M'}</span>
+            </div>
+            <div className="flex-1 space-y-1">
+              <input
+                type="text"
+                value={brandName}
+                onChange={(e) => setBrandName(e.target.value)}
+                className="input"
+                placeholder="Nombre de la app"
+                disabled={brandSaving}
+              />
+              <div className="flex items-center gap-2">
+                <input type="color" value={brandColor} onChange={(e) => setBrandColor(e.target.value)} className="h-7 w-7 cursor-pointer rounded border border-surface-300 bg-transparent p-0.5 dark:border-surface-600" />
+                <span className="text-xs text-surface-400 font-mono">{brandColor}</span>
+              </div>
+            </div>
+            <button type="submit" disabled={brandSaving || !brandName.trim()} className="btn-primary">
+              {brandSaving ? '...' : <><Check size={16} /> Guardar</>}
+            </button>
+          </div>
+          {brandMsg && (
+            <p className={`text-xs ${brandMsg === 'Guardado' ? 'text-green-600' : 'text-red-500'}`}>
+              {brandMsg === 'Guardado' ? <><Check size={14} className="inline" /> Cambios aplicados al instante</> : brandMsg}
+            </p>
+          )}
+        </form>
+      </div>
 
       {/* Create key */}
       <div className="card">
