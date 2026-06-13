@@ -25,15 +25,28 @@ export default function AdminPanel() {
   const { config: appConfig, updateConfig } = useAppConfig();
   const [brandName, setBrandName] = useState('');
   const [brandColor, setBrandColor] = useState('');
+  const [brandIcon, setBrandIcon] = useState('wallet');
+  const [brandIconOpen, setBrandIconOpen] = useState(false);
   const [brandSaving, setBrandSaving] = useState(false);
   const [brandMsg, setBrandMsg] = useState<string | null>(null);
+  const brandPickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (appConfig) {
       setBrandName(appConfig.app_name);
       setBrandColor(appConfig.primary_color);
+      setBrandIcon(appConfig.app_icon);
     }
   }, [appConfig]);
+
+  useEffect(() => {
+    if (!brandIconOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (brandPickerRef.current && !brandPickerRef.current.contains(e.target as Node)) setBrandIconOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [brandIconOpen]);
 
   const handleSaveBrand = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +54,7 @@ export default function AdminPanel() {
     setBrandSaving(true);
     setBrandMsg(null);
     try {
-      await updateConfig(user.token, { app_name: brandName.trim(), primary_color: brandColor });
+      await updateConfig(user.token, { app_name: brandName.trim(), primary_color: brandColor, app_icon: brandIcon });
       setBrandMsg('Guardado');
       setTimeout(() => setBrandMsg(null), 2000);
     } catch (err) {
@@ -311,6 +324,31 @@ export default function AdminPanel() {
               <div className="flex items-center gap-2">
                 <input type="color" value={brandColor} onChange={(e) => setBrandColor(e.target.value)} className="h-7 w-7 cursor-pointer rounded border border-surface-300 bg-transparent p-0.5 dark:border-surface-600" />
                 <span className="text-xs text-surface-400 font-mono">{brandColor}</span>
+                <div className="relative" ref={brandPickerRef}>
+                  <button type="button" onClick={() => setBrandIconOpen(!brandIconOpen)}
+                    className="flex h-7 w-7 items-center justify-center rounded border border-surface-300 bg-transparent transition-colors hover:bg-surface-100 dark:border-surface-600 dark:hover:bg-surface-800"
+                    title="Ícono de la app" disabled={brandSaving}>
+                    {(() => {
+                      const Icon = getIcon(brandIcon);
+                      return <Icon size={16} style={{ color: brandColor }} />;
+                    })()}
+                  </button>
+                  {brandIconOpen && (
+                    <div className="absolute left-0 top-full z-20 mt-1 grid max-h-72 w-[312px] grid-cols-6 gap-0 overflow-y-auto rounded-xl border border-surface-200 bg-white p-2 shadow-xl dark:border-surface-700 dark:bg-surface-900">
+                      {AVAILABLE_ICONS.map(name => {
+                        const Icon = getIcon(name);
+                        return (
+                          <button key={name} type="button" onClick={() => { setBrandIcon(name); setBrandIconOpen(false); }}
+                            className={`flex aspect-square items-center justify-center rounded-lg transition-colors hover:bg-surface-100 dark:hover:bg-surface-700 ${
+                              brandIcon === name ? 'ring-2 ring-primary-500 bg-surface-100 dark:bg-surface-700' : ''
+                            }`}>
+                            <Icon size={22} style={{ color: brandColor }} />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             <button type="submit" disabled={brandSaving || !brandName.trim()} className="btn-primary">

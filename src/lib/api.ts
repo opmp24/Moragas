@@ -36,8 +36,8 @@ export async function getAppConfig(): Promise<AppConfig> {
   return jsonObject<AppConfig>(data);
 }
 
-export async function adminUpdateAppConfig(token: string, data: { app_name?: string; primary_color?: string }): Promise<AppConfig> {
-  const result = await rpc('admin_update_app_config', { p_token: token, p_app_name: data.app_name || null, p_primary_color: data.primary_color || null });
+export async function adminUpdateAppConfig(token: string, data: { app_name?: string; primary_color?: string; app_icon?: string }): Promise<AppConfig> {
+  const result = await rpc('admin_update_app_config', { p_token: token, p_app_name: data.app_name || null, p_primary_color: data.primary_color || null, p_app_icon: data.app_icon || null });
   return jsonObject<AppConfig>(result);
 }
 

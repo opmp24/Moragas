@@ -69,6 +69,7 @@ export interface AppConfig {
   id: string;
   app_name: string;
   primary_color: string;
+  app_icon: string;
   updated_at: string;
   updated_by: string | null;
 }

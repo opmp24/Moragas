@@ -5,7 +5,7 @@ import type { AppConfig } from '../types';
 interface AppConfigContextValue {
   config: AppConfig | null;
   loading: boolean;
-  updateConfig: (token: string, data: { app_name?: string; primary_color?: string }) => Promise<void>;
+  updateConfig: (token: string, data: { app_name?: string; primary_color?: string; app_icon?: string }) => Promise<void>;
 }
 
 const AppConfigContext = createContext<AppConfigContextValue>({
@@ -94,7 +94,7 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
       .finally(() => setLoading(false));
   }, []);
 
-  const updateConfig = useCallback(async (token: string, data: { app_name?: string; primary_color?: string }) => {
+  const updateConfig = useCallback(async (token: string, data: { app_name?: string; primary_color?: string; app_icon?: string }) => {
     const updated = await adminUpdateAppConfig(token, data);
     setConfig(updated);
     applyColor(updated.primary_color);

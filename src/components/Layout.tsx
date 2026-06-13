@@ -10,9 +10,9 @@ import {
   Sun,
   Menu,
   X,
-  Wallet,
   ArrowLeftRight,
 } from 'lucide-react';
+import { getIcon } from '../lib/categoryIcons';
 import { useState } from 'react';
 
 export default function Layout() {
@@ -47,7 +47,7 @@ export default function Layout() {
               {mobileOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
             <Link to="/" className="flex items-center gap-2 font-semibold text-primary-700 dark:text-primary-400">
-              <Wallet size={22} />
+              {(() => { const Icon = getIcon(config?.app_icon || 'wallet'); return <Icon size={22} />; })()}
               <span className="hidden sm:inline">{config?.app_name || 'Moragas'}</span>
             </Link>
             <nav className="ml-6 hidden items-center gap-1 lg:flex">

@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useAppConfig } from '../context/AppConfigContext';
-import { Wallet, Key, AlertCircle, Eye, EyeOff, Moon, Sun, ChevronDown, Download } from 'lucide-react';
+import { Key, AlertCircle, Eye, EyeOff, Moon, Sun, ChevronDown, Download } from 'lucide-react';
+import { getIcon } from '../lib/categoryIcons';
 import { motion, useScroll, useTransform, useVelocity, useSpring } from 'framer-motion';
 
 function ParallaxItem({ children, speed, className = '' }: { children: React.ReactNode; speed: number; className?: string }) {
@@ -172,7 +173,7 @@ export default function Login() {
             className="mb-8 flex items-center gap-3"
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-md">
-              <Wallet className="text-white" size={24} />
+              {(() => { const Icon = getIcon(appConfig?.app_icon || 'wallet'); return <Icon className="text-white" size={24} />; })()}
             </div>
             <span className="text-2xl font-bold text-white">{appConfig?.app_name || 'Moragas'}</span>
           </motion.div>
@@ -291,7 +292,7 @@ export default function Login() {
             transition={{ duration: 0.8 }}
             className="text-2xl font-bold text-white"
           >
-            Controla tus finanzas desde Telegram
+            Controla tus finanzas tu Telefono
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 30 }}
@@ -300,7 +301,7 @@ export default function Login() {
             transition={{ duration: 0.8, delay: 0.15 }}
             className="mt-3 text-base text-white/60"
           >
-            Envía un mensaje al bot y Moragas clasifica automáticamente cada gasto o ingreso con IA.
+            Envía ingresos y gastos desde tu teléfono.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -311,7 +312,7 @@ export default function Login() {
           >
             <div className="flex items-start gap-3">
               <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-500/20 text-xs text-green-400">✓</span>
-              <p className="text-sm text-white/50"><strong className="text-white/70">Ejemplo:</strong> "Almuerzo 5.000" → Gasto · Comida · $5.000. "Sueldo 500.000" → Ingreso · Sueldo · $500.000</p>
+              <p className="text-sm text-white/50"><strong className="text-white/70">Ejemplo:</strong> Ingresos de aportes por cada usuario</p>
             </div>
             <div className="flex items-start gap-3">
               <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-500/20 text-xs text-green-400">✓</span>

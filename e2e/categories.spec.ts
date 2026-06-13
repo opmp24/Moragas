@@ -46,7 +46,7 @@ test('Editar una categoría', async ({ page }) => {
   await expect(nameInput).toHaveValue(originalName);
 
   await nameInput.fill(newName);
-  await page.locator('button:has-text("Guardar")').click();
+  await page.locator('button:has-text("Guardar")').last().click();
   await page.waitForTimeout(1500);
 
   await expect(categoryCard(page, newName)).toBeVisible({ timeout: 5000 });
