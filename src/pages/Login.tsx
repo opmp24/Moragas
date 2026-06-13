@@ -59,7 +59,7 @@ function Img({ src, className }: { src: string; className?: string }) {
     <img
       src={base + src}
       alt=""
-      className={`${className} shadow-lg`}
+      className={`${className} rounded-xl object-cover`}
       loading="lazy"
     />
   );
