@@ -314,6 +314,12 @@ export default function Login() {
               <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-500/20 text-xs text-green-400">✓</span>
               <p className="text-sm text-white/50"><strong className="text-white/70">Ejemplo:</strong> Ingresos de aportes por cada usuario</p>
             </div>
+            
+            <div className="flex items-start gap-3">
+              <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-500/20 text-xs text-green-400">✓</span>
+              <p className="text-sm text-white/50"><strong className="text-white/70">Ejemplo:</strong>Gastos que se realizand por categoria reflejados en los graficos</p>
+            </div>
+
             <div className="flex items-start gap-3">
               <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-500/20 text-xs text-green-400">✓</span>
               <p className="text-sm text-white/50"><strong className="text-white/70">Ventajas:</strong> Sin apps bancarias, multi-usuario con claves individuales, dashboard con gráficos por mes/categoría/usuario, PWA instalable en el celular</p>
