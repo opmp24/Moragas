@@ -131,6 +131,11 @@ export default function AdminPanel() {
     fetchCategories();
   }, [user]);
 
+  useEffect(() => {
+    const userCount = keys.filter(k => k.role !== 'admin' && k.is_active).length;
+    setNewUserColor(USER_COLORS[userCount % USER_COLORS.length]);
+  }, [keys.length]);
+
   const handleUpdateUserColor = async (k: AccessKey) => {
     if (!user || !editingColorKey) return;
     try {
@@ -146,7 +151,6 @@ export default function AdminPanel() {
     e.preventDefault();
     if (!user || !newName.trim()) return;
     setCreating(true);
-    const colorIdx = keys.filter(k => k.role !== 'admin').length % USER_COLORS.length;
     try {
       const result = await adminCreateKey(user.token, newName.trim(), newUserColor);
       setNewKey(result.key);
