@@ -7,6 +7,7 @@ export interface AccessKey {
   created_by: string | null;
   created_at: string;
   last_used_at: string | null;
+  user_color: string | null;
 }
 
 export interface Session {

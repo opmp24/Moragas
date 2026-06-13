@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getTransactions, getCategories } from '../lib/api';
+import { getTransactions, getCategories, adminListKeys } from '../lib/api';
 import type { Transaction, Category } from '../types';
 import { getIcon } from '../lib/categoryIcons';
 import { Receipt, ArrowUpDown, X, RefreshCw } from 'lucide-react';
@@ -20,6 +20,7 @@ export default function Movements() {
   const { user } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categoryDefs, setCategoryDefs] = useState<Category[]>([]);
+  const [userColorMap, setUserColorMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   const [sort, setSort] = useState<SortConfig>({ col: 'fecha', dir: 'desc' });
@@ -33,12 +34,18 @@ export default function Movements() {
     if (!user) return;
     setLoading(true);
     try {
-      const [txs, catDefs] = await Promise.all([
+      const [txs, catDefs, keys] = await Promise.all([
         getTransactions(user.token),
         getCategories(user.token),
+        adminListKeys(user.token),
       ]);
       setTransactions(txs);
       setCategoryDefs(catDefs);
+      const cmap: Record<string, string> = {};
+      for (const k of keys) {
+        if (k.user_color) cmap[k.display_name] = k.user_color;
+      }
+      setUserColorMap(cmap);
     } catch (err) {
       console.error(err);
     } finally {
@@ -226,7 +233,14 @@ export default function Movements() {
                           {tx.category}
                         </span>
                       </td>
-                      <td className="py-2.5 text-surface-500 whitespace-nowrap">{tx.user_name || '-'}</td>
+                      <td className="py-2.5 whitespace-nowrap">
+                        {tx.user_name ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium"
+                            style={{ backgroundColor: (userColorMap[tx.user_name] || '#6b7280') + '20', color: userColorMap[tx.user_name] || '#6b7280' }}>
+                            {tx.user_name}
+                          </span>
+                        ) : '-'}
+                      </td>
                       <td className="py-2.5 text-surface-600 dark:text-surface-400">{tx.description}</td>
                       <td className={`py-2.5 text-right font-mono font-medium whitespace-nowrap ${
                         tx.type === 'ingreso' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'

@@ -41,9 +41,19 @@ export async function adminUpdateAppConfig(token: string, data: { app_name?: str
   return jsonObject<AppConfig>(result);
 }
 
-export async function adminCreateKey(token: string, displayName: string): Promise<{ key: string; id: string }> {
-  const data = await rpc('admin_create_key', { p_token: token, p_display_name: displayName });
+export async function adminCreateKey(token: string, displayName: string, userColor?: string): Promise<{ key: string; id: string }> {
+  const data = await rpc('admin_create_key', { p_token: token, p_display_name: displayName, p_user_color: userColor || null });
   return jsonObject<{ key: string; id: string }>(data);
+}
+
+export async function adminUpdateKey(token: string, keyId: string, data: { display_name?: string; user_color?: string }): Promise<AccessKey> {
+  const result = await rpc('admin_update_key', {
+    p_token: token,
+    p_key_id: keyId,
+    p_display_name: data.display_name || null,
+    p_user_color: data.user_color || null,
+  });
+  return jsonObject<AccessKey>(result);
 }
 
 export async function adminRevokeKey(token: string, keyId: string): Promise<void> {

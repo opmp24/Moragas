@@ -72,6 +72,7 @@ describe('adminCreateKey', () => {
     expect(mockRpc).toHaveBeenCalledWith('admin_create_key', {
       p_token: 'tok',
       p_display_name: 'Juan',
+      p_user_color: null,
     });
     expect(result.key).toBe('48291637');
   });

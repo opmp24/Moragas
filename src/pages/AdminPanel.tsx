@@ -1,10 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useAppConfig } from '../context/AppConfigContext';
-import { adminListKeys, adminCreateKey, adminRevokeKey, adminResetKey, adminUpdateAppConfig, adminCreateTransaction, getCategories, adminCreateCategory, adminDeleteCategory, adminUpdateCategory } from '../lib/api';
+import { adminListKeys, adminCreateKey, adminRevokeKey, adminResetKey, adminUpdateAppConfig, adminCreateTransaction, getCategories, adminCreateCategory, adminDeleteCategory, adminUpdateCategory, adminUpdateKey } from '../lib/api';
 import type { AccessKey, Category } from '../types';
 import { getIcon, AVAILABLE_ICONS } from '../lib/categoryIcons';
-import { Key, Plus, X, Copy, Check, RefreshCw, UserCheck, UserX, DollarSign, Trash2, AlertCircle, Pencil, Palette } from 'lucide-react';
+import { Key, Plus, X, Copy, Check, RefreshCw, UserCheck, UserX, DollarSign, Trash2, AlertCircle, Pencil, Palette, Save } from 'lucide-react';
 
 export default function AdminPanel() {
   const { user } = useAuth();
@@ -20,6 +20,11 @@ export default function AdminPanel() {
     try { return JSON.parse(localStorage.getItem('moragas-plain-keys') || '{}'); } catch { return {}; }
   });
   const [resettingKey, setResettingKey] = useState<string | null>(null);
+  const [newUserColor, setNewUserColor] = useState('#6b7280');
+  const [editingColorKey, setEditingColorKey] = useState<string | null>(null);
+  const [editColorVal, setEditColorVal] = useState('#6b7280');
+
+  const USER_COLORS = ['#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#a855f7','#f43f5e','#84cc16','#0ea5e9','#d946ef','#10b981','#f59e0b'];
 
   // Branding state
   const { config: appConfig, updateConfig } = useAppConfig();
@@ -126,12 +131,24 @@ export default function AdminPanel() {
     fetchCategories();
   }, [user]);
 
+  const handleUpdateUserColor = async (k: AccessKey) => {
+    if (!user || !editingColorKey) return;
+    try {
+      await adminUpdateKey(user.token, k.id, { user_color: editColorVal });
+      await fetchKeys();
+    } catch (err) {
+      console.error(err);
+    }
+    setEditingColorKey(null);
+  };
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !newName.trim()) return;
     setCreating(true);
+    const colorIdx = keys.filter(k => k.role !== 'admin').length % USER_COLORS.length;
     try {
-      const result = await adminCreateKey(user.token, newName.trim());
+      const result = await adminCreateKey(user.token, newName.trim(), newUserColor);
       setNewKey(result.key);
       setPlainKeys(prev => ({ ...prev, [result.id]: result.key }));
       setNewName('');
@@ -376,6 +393,7 @@ export default function AdminPanel() {
             placeholder="Nombre del usuario"
             disabled={creating}
           />
+          <input type="color" value={newUserColor} onChange={(e) => setNewUserColor(e.target.value)} className="h-9 w-9 cursor-pointer rounded border border-surface-300 bg-transparent p-0.5 dark:border-surface-600" title="Color del usuario" />
           <button type="submit" disabled={creating || !newName.trim()} className="btn-primary">
             {creating ? 'Creando...' : <><Plus size={16} /> Crear</>}
           </button>
@@ -580,11 +598,10 @@ export default function AdminPanel() {
                 className="flex items-center justify-between rounded-lg border border-surface-200 p-3 dark:border-surface-700"
               >
                 <div className="flex items-center gap-3">
-                  <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium ${
-                    k.role === 'admin'
-                      ? 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-400'
-                      : 'bg-surface-100 text-surface-600 dark:bg-surface-800 dark:text-surface-400'
-                  }`}>
+                  <div
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium"
+                    style={{ backgroundColor: (k.user_color || '#6b7280') + '20', color: k.user_color || '#6b7280' }}
+                  >
                     {k.display_name.charAt(0).toUpperCase()}
                   </div>
                   <div>
@@ -601,14 +618,31 @@ export default function AdminPanel() {
                   {k.is_active ? (
                     <>
                       {k.role !== 'admin' && (
-                        <button
-                          onClick={() => handleResetKey(k.id)}
-                          disabled={resettingKey === k.id}
-                          className="btn-ghost p-2 text-surface-400 hover:text-amber-600"
-                          title="Resetear clave"
-                        >
-                          <RefreshCw size={16} className={resettingKey === k.id ? 'animate-spin' : ''} />
-                        </button>
+                        <>
+                          {editingColorKey === k.id ? (
+                            <div className="flex items-center gap-1">
+                              <input type="color" value={editColorVal} onChange={(e) => setEditColorVal(e.target.value)} className="h-7 w-7 cursor-pointer rounded border border-surface-300 bg-transparent p-0.5 dark:border-surface-600" />
+                              <button onClick={() => handleUpdateUserColor(k)} className="btn-ghost p-1 text-green-600" title="Guardar color"><Save size={15} /></button>
+                              <button onClick={() => setEditingColorKey(null)} className="btn-ghost p-1 text-surface-400" title="Cancelar"><X size={15} /></button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => { setEditingColorKey(k.id); setEditColorVal(k.user_color || '#6b7280'); }}
+                              className="btn-ghost p-2 text-surface-400 hover:text-primary-600"
+                              title="Cambiar color"
+                            >
+                              <Palette size={16} />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleResetKey(k.id)}
+                            disabled={resettingKey === k.id}
+                            className="btn-ghost p-2 text-surface-400 hover:text-amber-600"
+                            title="Resetear clave"
+                          >
+                            <RefreshCw size={16} className={resettingKey === k.id ? 'animate-spin' : ''} />
+                          </button>
+                        </>
                       )}
                       <button
                         onClick={() => handleRevoke(k.id)}

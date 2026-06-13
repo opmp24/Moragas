@@ -34,6 +34,10 @@ vi.mock('../../lib/api', () => {
       { id: 'c3', name: 'sueldo', type: 'ingreso', color: '#10b981', icon: 'briefcase', created_at: '' },
       { id: 'c4', name: 'freelance', type: 'ingreso', color: '#3b82f6', icon: 'laptop', created_at: '' },
     ]),
+    adminListKeys: vi.fn().mockResolvedValue([
+      { id: 'k1', display_name: 'Juan', user_color: '#ef4444' },
+      { id: 'k2', display_name: 'María', user_color: '#3b82f6' },
+    ]),
   };
 });
 
