@@ -65,6 +65,7 @@ async function sendTelegramMessage(chatId: number, text: string) {
 }
 
 Deno.serve(async (req) => {
+  let chatId: number | null = null
   try {
     const body = await req.json()
 
@@ -73,7 +74,7 @@ Deno.serve(async (req) => {
       return new Response("ok", { status: 200 })
     }
 
-    const chatId: number = body.message.chat.id
+    chatId = body.message.chat.id
     const text: string = body.message.text || ""
     const messageId: number | null = body.message.message_id || null
 
@@ -106,17 +107,14 @@ Deno.serve(async (req) => {
     return new Response("ok", { status: 200 })
   } catch (e) {
     console.error("Webhook error:", e)
-    try {
-      const body = await req.clone().json()
-      const chatId = body.message?.chat?.id
-      if (chatId) {
-        const msg = e instanceof Error && e.message?.includes("Gemini API")
-          ? "❌ Gemini API no habilitada. Activá la Generative Language API en https://console.cloud.google.com/apis/library/generativelanguage.googleapis.com?project=912408221896"
-          : "❌ No pude procesar el mensaje. Verifica el formato: monto, categoria y tipo (ingreso/gasto)"
-        await sendTelegramMessage(chatId, msg)
-      }
-    } catch {
-      // ignore
+    if (chatId) {
+      const errMsg = e instanceof Error ? e.message : String(e)
+      const msg = errMsg.includes("SERVICE_DISABLED")
+        ? "❌ Gemini API no habilitada. Activá la Generative Language API en https://console.cloud.google.com/apis/library/generativelanguage.googleapis.com?project=912408221896"
+        : errMsg.includes("quota") || errMsg.includes("RESOURCE_EXHAUSTED")
+        ? "❌ Gemini API sin cupo disponible (cuota gratuita agotada). Esperá un minuto y probá de nuevo."
+        : `❌ Error: ${errMsg.slice(0, 200)}`
+      await sendTelegramMessage(chatId, msg).catch(() => {})
     }
     return new Response("ok", { status: 200 })
   }

@@ -91,7 +91,7 @@ export default function AdminPanel() {
   const [catError, setCatError] = useState<string | null>(null);
   const [catIconOpen, setCatIconOpen] = useState(false);
   const [catEditId, setCatEditId] = useState<string | null>(null);
-  const [catDeleteId, setCatDeleteId] = useState<string | null>(null);
+
   const [catDeleting, setCatDeleting] = useState(false);
   const [catDeleteError, setCatDeleteError] = useState<string | null>(null);
   const catPickerRef = useRef<HTMLDivElement>(null);
@@ -273,24 +273,18 @@ export default function AdminPanel() {
     }
   };
 
-  const handleDeleteCategory = async () => {
-    if (!user || !catDeleteId) return;
+  const handleDeleteCategory = async (categoryId: string) => {
+    if (!user) return;
     setCatDeleting(true);
     setCatDeleteError(null);
     try {
-      await adminDeleteCategory(user.token, catDeleteId);
-      setCatDeleteId(null);
+      await adminDeleteCategory(user.token, categoryId);
       await fetchCategories();
     } catch (err) {
       setCatDeleteError(err instanceof Error ? err.message : 'Error al eliminar categoría');
     } finally {
       setCatDeleting(false);
     }
-  };
-
-  const confirmDeleteCategory = (cat: Category) => {
-    setCatDeleteError(null);
-    setCatDeleteId(cat.id);
   };
 
   // Close icon picker on outside click
@@ -538,16 +532,6 @@ export default function AdminPanel() {
           </div>
         )}
 
-        {catDeleteId && !catDeleteError && (
-          <div className="mb-3 flex items-center gap-3 rounded-lg border border-orange-200 bg-orange-50 p-3 text-sm text-orange-700 dark:border-orange-800 dark:bg-orange-950 dark:text-orange-400">
-            <span>¿Eliminar esta categoría?</span>
-            <button onClick={handleDeleteCategory} disabled={catDeleting} className="btn-sm bg-red-500 text-white hover:bg-red-600">
-              {catDeleting ? 'Eliminando...' : 'Sí, eliminar'}
-            </button>
-            <button onClick={() => setCatDeleteId(null)} className="btn-ghost text-surface-500">Cancelar</button>
-          </div>
-        )}
-
         {catLoading ? (
           <div className="flex h-16 items-center justify-center">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary-600 border-t-transparent" />
@@ -573,7 +557,7 @@ export default function AdminPanel() {
                     <button onClick={() => handleEditCategory(c)} className="btn-ghost p-2 text-surface-400 hover:text-primary-600" title="Editar categoría">
                       <Pencil size={15} />
                     </button>
-                    <button onClick={() => confirmDeleteCategory(c)} className="btn-ghost p-2 text-red-400 hover:text-red-600" title="Eliminar categoría">
+                    <button onClick={() => handleDeleteCategory(c.id)} className="btn-ghost p-2 text-red-400 hover:text-red-600" title="Eliminar categoría">
                       <Trash2 size={15} />
                     </button>
                   </div>

@@ -3,7 +3,7 @@
 ## Project Overview
 
 **Moragas** — App de finanzas personales. Admin envía mensajes a un bot de Telegram → Gemini clasifica (ingreso/egreso, categoría, monto) → guarda en Supabase. Usuarios acceden vía clave única y ven dashboard con gráficos.
-el agente debe responder siempre en español.
+el agente debe responder siempre en español neutro.
 
 - Telegram bot: `@OkoViajero_bot`
 - Supabase project: `yfdwtfricvquakrtarey`
@@ -187,6 +187,16 @@ Moragas/
    ```
    curl -X POST "https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://yfdwtfricvquakrtarey.supabase.co/functions/v1/telegram-webhook"
    ```
+
+---
+
+## Gemini API — Cuota Free Tier
+
+- Proyecto GCP `912408221896` — cuota diaria: **1,500 requests/día**, por minuto: **60 requests/min**
+- **No hacer más de 2 llamadas de prueba a Gemini por sesión** sin verificar el resultado y sin continuar acumulando hasta agotar la cuota
+- Preferir probar el flujo completo enviando un solo mensaje desde Telegram, en vez de curls directos a Gemini
+- La cuota es **por proyecto GCP**, no por API key — cambiar la key no renueva la cuota
+- Si se agota la cuota diaria, esperar ~24h al reset
 
 ---
 
