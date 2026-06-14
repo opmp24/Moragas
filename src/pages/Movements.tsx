@@ -1,9 +1,9 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getTransactions, getCategories, adminListKeys } from '../lib/api';
+import { getTransactions, getCategories, adminListKeys, adminUpdateTransaction, adminDeleteTransaction } from '../lib/api';
 import type { Transaction, Category } from '../types';
 import { getIcon } from '../lib/categoryIcons';
-import { Receipt, ArrowUpDown, X, RefreshCw } from 'lucide-react';
+import { Receipt, ArrowUpDown, X, RefreshCw, Pencil, Trash2, Check, AlertCircle } from 'lucide-react';
 
 function formatCLP(n: number) {
   return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n);
@@ -22,6 +22,7 @@ export default function Movements() {
   const [categoryDefs, setCategoryDefs] = useState<Category[]>([]);
   const [userColorMap, setUserColorMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [sort, setSort] = useState<SortConfig>({ col: 'fecha', dir: 'desc' });
 
@@ -30,9 +31,18 @@ export default function Movements() {
   const [filterFrom, setFilterFrom] = useState('');
   const [filterTo, setFilterTo] = useState('');
 
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editType, setEditType] = useState<'ingreso' | 'egreso'>('egreso');
+  const [editCategory, setEditCategory] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editSaving, setEditSaving] = useState(false);
+
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
   const fetchData = async () => {
     if (!user) return;
     setLoading(true);
+    setError(null);
     try {
       const [txs, catDefs, keys] = await Promise.all([
         getTransactions(user.token),
@@ -47,7 +57,7 @@ export default function Movements() {
       }
       setUserColorMap(cmap);
     } catch (err) {
-      console.error(err);
+      setError(err instanceof Error ? err.message : 'Error al cargar datos');
     } finally {
       setLoading(false);
     }
@@ -71,6 +81,10 @@ export default function Movements() {
     }
     return result.sort();
   }, [transactions]);
+
+  const filteredCatDefs = useMemo(() => {
+    return categoryDefs.filter(c => c.type === editType);
+  }, [categoryDefs, editType]);
 
   const filteredTx = useMemo(() => {
     let result = [...transactions];
@@ -138,6 +152,60 @@ export default function Movements() {
 
   const hasFilters = filterCat || filterUser || filterFrom || filterTo;
 
+  const startEdit = (tx: Transaction) => {
+    if (editSaving) return;
+    setEditId(tx.id);
+    setEditType(tx.type);
+    setEditCategory(tx.category);
+    setEditDescription(tx.description || '');
+  };
+
+  const cancelEdit = () => {
+    if (editSaving) return;
+    setEditId(null);
+  };
+
+  const saveEdit = async () => {
+    if (!user || !editId || editSaving) return;
+    const tx = transactions.find(t => t.id === editId);
+    if (!tx) return;
+
+    if (editType === tx.type && editCategory === tx.category && editDescription === (tx.description || '')) {
+      setEditId(null);
+      return;
+    }
+
+    setEditSaving(true);
+    setError(null);
+    try {
+      const updated = await adminUpdateTransaction(user.token, editId, {
+        type: editType !== tx.type ? editType : undefined,
+        category: editCategory !== tx.category ? editCategory : undefined,
+        description: editDescription !== (tx.description || '') ? editDescription : undefined,
+      });
+      setTransactions(prev => prev.map(t => t.id === editId ? updated : t));
+      setEditId(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al actualizar');
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+  const handleDelete = async (txId: string) => {
+    if (!user || deletingId) return;
+    setDeletingId(txId);
+    setError(null);
+    try {
+      await adminDeleteTransaction(user.token, txId);
+      setTransactions(prev => prev.filter(t => t.id !== txId));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al eliminar');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const SortIcon = ({ col }: { col: SortCol }) => {
     if (sort.col !== col) return <ArrowUpDown size={12} className="ml-1 inline opacity-30" />;
     return <span className="ml-1">{sort.dir === 'desc' ? '▼' : '▲'}</span>;
@@ -190,6 +258,14 @@ export default function Movements() {
           )}
         </div>
 
+        {error && (
+          <div className="mb-3 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
+            <AlertCircle size={16} className="shrink-0" />
+            {error}
+            <button onClick={() => setError(null)} className="ml-auto btn-ghost p-1"><X size={14} /></button>
+          </div>
+        )}
+
         {filteredTx.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-8 text-surface-400">
             <Receipt size={32} />
@@ -203,17 +279,87 @@ export default function Movements() {
                   <th className="cursor-pointer pb-2 font-medium select-none hover:text-surface-700 dark:hover:text-surface-300" onClick={() => handleSort('fecha')}>Fecha<SortIcon col="fecha" /></th>
                   <th className="cursor-pointer pb-2 font-medium select-none hover:text-surface-700 dark:hover:text-surface-300" onClick={() => handleSort('tipo')}>Tipo<SortIcon col="tipo" /></th>
                   <th className="cursor-pointer pb-2 font-medium select-none hover:text-surface-700 dark:hover:text-surface-300" onClick={() => handleSort('categoria')}>Categoría<SortIcon col="categoria" /></th>
-                  <th className="cursor-pointer pb-2 font-medium select-none hover:text-surface-700 dark:hover:text-surface-300" onClick={() => handleSort('usuario')}>Usuario<SortIcon col="usuario" /></th>
+                  <th className="pb-2 font-medium">Usuario</th>
                   <th className="pb-2 font-medium">Descripción</th>
                   <th className="cursor-pointer pb-2 font-medium text-right select-none hover:text-surface-700 dark:hover:text-surface-300" onClick={() => handleSort('monto')}>Monto<SortIcon col="monto" /></th>
+                  <th className="w-20 pb-2 font-medium text-center">Acción</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredTx.map((tx) => {
                   const cat = catLookup.get(tx.category);
                   const Icon = cat ? getIcon(cat.icon) : null;
+                  const isEditing = editId === tx.id;
+                  const isDeleting = deletingId === tx.id;
+
+                  if (isEditing) {
+                    return (
+                      <tr key={tx.id} className="border-b last:border-0 border-surface-100 dark:border-surface-800 bg-primary-50 dark:bg-primary-950/30">
+                        <td className="py-2 text-surface-500 whitespace-nowrap">
+                          {new Date(tx.created_at).toLocaleDateString('es-CL')}
+                        </td>
+                        <td className="py-2">
+                          <select
+                            value={editType}
+                            onChange={(e) => setEditType(e.target.value as 'ingreso' | 'egreso')}
+                            className="input w-24 text-xs"
+                            disabled={editSaving}
+                          >
+                            <option value="egreso">Gasto</option>
+                            <option value="ingreso">Ingreso</option>
+                          </select>
+                        </td>
+                        <td className="py-2">
+                          <select
+                            value={editCategory}
+                            onChange={(e) => setEditCategory(e.target.value)}
+                            className="input w-32 text-xs"
+                            disabled={editSaving}
+                          >
+                            {filteredCatDefs.map(c => (
+                              <option key={c.id} value={c.name}>{c.name}</option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="py-2 whitespace-nowrap">
+                          {tx.user_name ? (
+                            <span className="inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium"
+                              style={{ backgroundColor: (userColorMap[tx.user_name] || '#6b7280') + '20', color: userColorMap[tx.user_name] || '#6b7280' }}>
+                              {tx.user_name}
+                            </span>
+                          ) : '-'}
+                        </td>
+                        <td className="py-2">
+                          <input
+                            type="text"
+                            value={editDescription}
+                            onChange={(e) => setEditDescription(e.target.value)}
+                            className="input w-full text-xs"
+                            disabled={editSaving}
+                            placeholder="Descripción"
+                          />
+                        </td>
+                        <td className={`py-2 text-right font-mono font-medium whitespace-nowrap ${
+                          tx.type === 'ingreso' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                        }`}>
+                          {formatCLP(tx.amount)}
+                        </td>
+                        <td className="py-2 text-center">
+                          <div className="flex items-center justify-center gap-1">
+                            <button onClick={saveEdit} disabled={editSaving} className="btn-ghost p-1.5 text-green-600 hover:text-green-700" title="Guardar">
+                              {editSaving ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-green-600 border-t-transparent" /> : <Check size={16} />}
+                            </button>
+                            <button onClick={cancelEdit} disabled={editSaving} className="btn-ghost p-1.5 text-surface-400 hover:text-red-600" title="Cancelar">
+                              <X size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  }
+
                   return (
-                    <tr key={tx.id} className="border-b last:border-0 border-surface-100 dark:border-surface-800">
+                    <tr key={tx.id} className={`border-b last:border-0 border-surface-100 dark:border-surface-800 ${isDeleting ? 'opacity-50' : ''}`}>
                       <td className="py-2.5 text-surface-500 whitespace-nowrap">
                         {new Date(tx.created_at).toLocaleDateString('es-CL')}
                       </td>
@@ -241,11 +387,21 @@ export default function Movements() {
                           </span>
                         ) : '-'}
                       </td>
-                      <td className="py-2.5 text-surface-600 dark:text-surface-400">{tx.description}</td>
+                      <td className="py-2.5 text-surface-600 dark:text-surface-400 max-w-[200px] truncate">{tx.description}</td>
                       <td className={`py-2.5 text-right font-mono font-medium whitespace-nowrap ${
                         tx.type === 'ingreso' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                       }`}>
                         {formatCLP(tx.amount)}
+                      </td>
+                      <td className="py-2.5 text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <button onClick={() => startEdit(tx)} disabled={editSaving} className="btn-ghost p-1.5 text-surface-400 hover:text-primary-600" title="Editar">
+                            <Pencil size={15} />
+                          </button>
+                          <button onClick={() => handleDelete(tx.id)} disabled={!!deletingId} className="btn-ghost p-1.5 text-red-400 hover:text-red-600" title="Eliminar">
+                            {isDeleting ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-red-400 border-t-transparent" /> : <Trash2 size={15} />}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );

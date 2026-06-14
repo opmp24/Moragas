@@ -54,24 +54,24 @@ Moragas/
 │   ├── pages/                    # Login, Dashboard, AdminPanel
 │   ├── context/                  # AuthContext, ThemeContext
 │   ├── components/Charts/        # MonthlyChart, CategoryChart (Recharts)
-│   ├── lib/                      # supabase.ts, api.ts (Netlify Functions client)
+│   ├── lib/                      # supabase.ts, api.ts ( Functions client)
 │   └── types/                    # TypeScript interfaces
 │   ├── __tests__/                 # Test unitarios (api)
 │   └── pages/__tests__/           # Test unitarios (componentes)
 ├── e2e/                           # Test E2E con Playwright
 ├── supabase/functions/           # Supabase Edge Functions (backend)
 │   └── telegram-webhook/         # Bot Telegram + Gemini AI
-├── netlify/functions/            # Netlify Functions (vacio, migrado a Edge)
+├── /functions/                   #  Functions (vacio, migrado a Edge)
 ├── supabase/migrations/          # SQL migrations
 ├── public/icons/                 # PWA icons (SVG)
 ├── shared/types.ts               # Tipos compartidos frontend/backend
 ├── vite.config.ts                # Vite + PWA plugin config
 ├── tailwind.config.ts            # Tailwind con colores personalizados
-├── netlify.toml                  # Deploy config
+
 ├── .env.example                  # Variables de entorno
 └── Docs/                         # Keys.txt (gitignored, local only)
 ```
-
+en supabase/config.toml # las funciones para la BBDD aqui
 ---
 
 ## Architecture
@@ -118,11 +118,11 @@ Moragas/
 |----------|-------------|
 | `VITE_SUPABASE_URL` | Frontend (build + runtime) |
 | `VITE_SUPABASE_ANON_KEY` | Frontend (build + runtime) |
-| `SUPABASE_SERVICE_KEY` | Netlify Functions (solo runtime) |
-| `TELEGRAM_BOT_TOKEN` | Netlify Functions |
-| `ADMIN_TELEGRAM_ID` | Netlify Functions |
-| `GEMINI_API_KEY` | Netlify Functions |
-| `ADMIN_MASTER_KEY` | Netlify Functions (default: MoragasAdmin2024) |
+| `SUPABASE_SERVICE_KEY` |  Functions (solo runtime) |
+| `TELEGRAM_BOT_TOKEN` |  Functions |
+| `ADMIN_TELEGRAM_ID` |  Functions |
+| `GEMINI_API_KEY` |  Functions |
+| `ADMIN_MASTER_KEY` |  Functions (default: MoragasAdmin2024) |
 | `PUBLIC_URL` | Dev/prod URL |
 
 ---
@@ -159,7 +159,7 @@ Moragas/
 
 ### Security
 - `Docs/` está en `.gitignore` — las keys nunca se suben
-- `SUPABASE_SERVICE_KEY` solo en Netlify Functions (nunca en frontend)
+- `SUPABASE_SERVICE_KEY` solo en  Functions (nunca en frontend)
 - Sesiones se validan contra Supabase en cada request
 - Admin revoca claves → sesiones se eliminan automáticamente
 
@@ -173,8 +173,8 @@ Moragas/
 
 ## Deploy
 
-1. Conectar repo `opmp24/Moragas` a Netlify
-2. Configurar environment variables en Netlify Dashboard
+1. Conectar repo `opmp24/Moragas` 
+2. Configurar environment variables 
 3. Deploy automático desde `main`
 4. Ejecutar migraciones SQL en Supabase Dashboard > SQL Editor
 5. (Opcional) Ejecutar seed.sql para datos de ejemplo

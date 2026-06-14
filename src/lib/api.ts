@@ -124,6 +124,25 @@ export async function adminDeleteCategory(token: string, categoryId: string): Pr
   await rpc('admin_delete_category', { p_token: token, p_category_id: categoryId });
 }
 
+export async function adminUpdateTransaction(
+  token: string,
+  transactionId: string,
+  data: { type?: 'ingreso' | 'egreso'; category?: string; description?: string }
+): Promise<Transaction> {
+  const result = await rpc('admin_update_transaction', {
+    p_token: token,
+    p_transaction_id: transactionId,
+    p_type: data.type || null,
+    p_category: data.category || null,
+    p_description: data.description ?? null,
+  });
+  return jsonObject<Transaction>(result);
+}
+
+export async function adminDeleteTransaction(token: string, transactionId: string): Promise<void> {
+  await rpc('admin_delete_transaction', { p_token: token, p_transaction_id: transactionId });
+}
+
 export async function adminUpdateCategory(
   token: string,
   categoryId: string,

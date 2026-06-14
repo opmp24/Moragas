@@ -63,9 +63,6 @@ test('Eliminar una categoría', async ({ page }) => {
   await expect(categoryCard(page, catName)).toBeVisible({ timeout: 3000 });
 
   await categoryCard(page, catName).locator('button[title="Eliminar categoría"]').click();
-  await page.waitForTimeout(500);
-
-  await page.locator('button:has-text("Sí, eliminar")').click();
   await page.waitForTimeout(1500);
 
   await expect(categoryCard(page, catName)).toHaveCount(0);
